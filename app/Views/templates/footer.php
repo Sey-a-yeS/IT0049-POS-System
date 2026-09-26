@@ -1,10 +1,10 @@
-    </main>
+            </main>
 
-    <footer class="site-footer">
-        <div class="container footer-wrap">
-            <p>POS System &middot; Technical Formative Assessment 1</p>
-            <p>IT0049 &mdash; Web System Technologies</p>
+            <footer class="site-footer">
+                <p>POS System &middot; Technical Formative Assessment 2</p>
+                <p>IT0049 &mdash; Web System Technologies</p>
+            </footer>
         </div>
-    </footer>
+    </div>
 </body>
 </html>
