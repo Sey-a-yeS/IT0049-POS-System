@@ -11,11 +11,11 @@ class Users extends BaseController
         $userModel = new UserModel();
 
         $data = [
-            'title'      => 'User Accounts',
-            'activePage' => 'users',
-            'users'      => $userModel->findAll(),
+            'title'      => 'Profile',
+            'activePage' => 'profile',
+            'user'       => $userModel->first(),
         ];
 
-        return view('users/index', $data);
+        return view('profile', $data);
     }
 }

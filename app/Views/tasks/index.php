@@ -3,28 +3,28 @@
 <div class="content-wrap">
     <section class="page-intro directory-intro">
         <div>
-            <span class="eyebrow">Daily focus</span>
-            <h1>Tasks for today</h1>
-            <p><?= esc(date('l, F j, Y', strtotime($today))) ?> &mdash; only tasks scheduled for today are shown here.</p>
+            <span class="eyebrow">Complete schedule</span>
+            <h1>All tasks</h1>
+            <p>Every task in the database, ordered by its scheduled date.</p>
         </div>
-        <div class="record-count" aria-label="<?= esc(count($tasks)) ?> tasks scheduled today">
+        <div class="record-count" aria-label="<?= esc(count($tasks)) ?> total tasks">
             <strong><?= esc(count($tasks)) ?></strong>
-            <span>Due today</span>
+            <span>Total tasks</span>
         </div>
     </section>
 
-    <section class="table-panel" aria-labelledby="today-task-title">
+    <section class="table-panel" aria-labelledby="all-task-title">
         <div class="table-toolbar">
             <div>
-                <span class="section-kicker">Today's schedule</span>
-                <h2 id="today-task-title">Current tasks</h2>
+                <span class="section-kicker">Task register</span>
+                <h2 id="all-task-title">All scheduled tasks</h2>
             </div>
-            <span class="data-label">tasks table</span>
+            <span class="data-label">ordered by task_date</span>
         </div>
 
         <div class="table-scroll" tabindex="0">
             <table>
-                <caption class="sr-only">Tasks scheduled for today</caption>
+                <caption class="sr-only">All tasks ordered by date</caption>
                 <thead>
                     <tr>
                         <th scope="col">ID</th>
@@ -37,7 +37,7 @@
                 <tbody>
                     <?php if ($tasks === []): ?>
                         <tr>
-                            <td class="empty-state" colspan="5">No tasks are scheduled for today.</td>
+                            <td class="empty-state" colspan="5">No tasks found.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($tasks as $task): ?>
@@ -54,10 +54,6 @@
             </table>
         </div>
     </section>
-
-    <div class="page-action">
-        <a class="button button-primary" href="<?= site_url('tasks') ?>">View all tasks</a>
-    </div>
 </div>
 
 <?= view('templates/footer') ?>
