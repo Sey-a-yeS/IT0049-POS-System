@@ -1,32 +1,40 @@
-# Tasks for Today Management System
+# CodeIgniter 4 POS System
 
 ## Project
 
-This CodeIgniter 4 application was developed by **Isaiah Ezekiel P. Vicencio** for **IT0049 - Web System Technologies, Technical Summative Assessment 1**.
+This Point-of-Sale application was developed for **IT0049 - Web System Technologies** and extended for **Technical Formative Assessment 3: Making It Editable — Forms, Validation, and File Upload**.
 
-The system presents today's tasks, the complete task schedule, and one database-backed user profile through a clear MVC flow:
+The application uses CodeIgniter MVC throughout:
 
 ```text
-MySQL database -> CodeIgniter Model -> Controller -> View -> HTML response
+Browser -> Route -> Controller -> Model -> MySQL -> View
 ```
 
 ## Features
 
-- Welcome page showing only tasks scheduled for the current date
-- All Tasks page showing every task ordered by `task_date`
-- Profile page showing the single demonstration user
-- Static About page identifying the developer
-- Database access through `TaskModel` and `UserModel`
-- Explicit routes and reusable responsive page templates
+- Database-backed Customer Accounts and User Accounts listings
+- Customer creation with server-side validation and preserved old input
+- User creation with required and unique username validation
+- Customer and user edit/update workflows
+- Optional user avatar upload during editing
+- JPG/PNG validation with a 2 MB maximum
+- Safe random avatar filenames
+- Display-ready square avatar preparation using CodeIgniter's Image service
+- Local placeholder image when an avatar is unavailable
+- CSRF-protected forms and escaped output
+- Redirect-after-success workflows to prevent duplicate submissions on refresh
+
+The application intentionally does not include authentication, passwords, roles, deletion, registration, or unrelated CRUD features.
 
 ## Requirements
 
 - PHP 8.2 or newer
 - Composer
 - MySQL or MariaDB
-- PHP extensions required by CodeIgniter 4, including `intl`, `mbstring`, and `mysqli`
+- PHP extensions required by CodeIgniter 4, including `intl`, `mbstring`, `mysqli`, and `gd`
+- Write access to `public/uploads/avatars/`
 
-## Installation
+## Installation and setup
 
 1. Enter the project directory:
 
@@ -40,7 +48,7 @@ MySQL database -> CodeIgniter Model -> Controller -> View -> HTML response
    composer install
    ```
 
-3. Create the local environment file if it does not already exist:
+3. Create the local environment file if needed:
 
    ```bash
    cp env .env
@@ -54,7 +62,7 @@ MySQL database -> CodeIgniter Model -> Controller -> View -> HTML response
    app.indexPage = ''
 
    database.default.hostname = 127.0.0.1
-   database.default.database = tasks_today_db
+   database.default.database = pos_db
    database.default.username = root
    database.default.password =
    database.default.DBDriver = MySQLi
@@ -62,56 +70,84 @@ MySQL database -> CodeIgniter Model -> Controller -> View -> HTML response
    database.default.port = 3306
    ```
 
-   Change the username, password, or port to match your local database installation. `.env` is ignored by Git and must not be committed.
+   Change the connection values for your own MySQL installation. `.env` is ignored by Git and must not be committed.
 
-5. Import the included database setup:
+5. Import the database setup:
 
    ```bash
-   mysql --host=127.0.0.1 --port=3306 -u root -p < database/tasks_today_db.sql
+   mysql --host=127.0.0.1 --port=3306 -u root -p < database/pos_db.sql
    ```
 
-   The SQL file creates `tasks_today_db`, creates the required `tasks` and `users` tables, inserts nine tasks across three dates relative to the import date, and inserts exactly one user.
+   The setup recreates the required `customers` and `users` tables. The TFA3 `users` schema includes a nullable `avatar VARCHAR(255)` column that stores a generated filename only.
 
-6. Start the development server:
+6. Ensure the avatar directory is writable by the web server:
+
+   ```bash
+   chmod 755 public/uploads/avatars
+   ```
+
+7. Start CodeIgniter:
 
    ```bash
    php spark serve
    ```
 
-7. Open [http://localhost:8080/](http://localhost:8080/).
+8. Open [http://localhost:8080/](http://localhost:8080/).
 
-## Routes
+## Application routes
 
-| Method | URL | Controller method | Purpose |
-| --- | --- | --- | --- |
-| GET | `/` | `Tasks::today` | Tasks scheduled for today |
-| GET | `/tasks` | `Tasks::index` | All tasks ordered by date |
-| GET | `/profile` | `Users::index` | Single database user |
-| GET | `/about` | `Pages::about` | Project and developer information |
+| Method | URL | Purpose |
+| --- | --- | --- |
+| GET | `/` | Home |
+| GET | `/about` | About |
+| GET | `/customers` | Customer Accounts |
+| GET | `/customers/new` | New Customer form |
+| POST | `/customers` | Validate and create customer |
+| GET | `/customers/{id}/edit` | Edit Customer form |
+| POST | `/customers/{id}` | Validate and update customer |
+| GET | `/users` | User Accounts |
+| GET | `/users/new` | New User form |
+| POST | `/users` | Validate and create user |
+| GET | `/users/{id}/edit` | Edit User and avatar form |
+| POST | `/users/{id}` | Validate and update user/avatar |
 
-## Database schema
+## Customer workflows
 
-The reproducible database setup is located at:
+### New Customer
 
-```text
-database/tasks_today_db.sql
-```
+Open `/customers/new`. Full name and email are required, and the email must be valid. Phone is optional. Invalid submissions display validation errors and preserve all submitted values. Valid records are inserted through `CustomerModel` and redirected to Customer Accounts.
 
-### `tasks`
+### Edit Customer
 
-- `id`
-- `title`
-- `status`
-- `task_date`
-- `created_at`
+Use the Edit action from Customer Accounts. Existing values are pre-filled. Validation uses the same required-name and valid-email rules. A successful submission updates the existing ID through `CustomerModel` and redirects to the listing.
 
-### `users`
+## User workflows
 
-- `id`
-- `username`
-- `full_name`
-- `email`
-- `created_at`
+### New User
+
+Open `/users/new`. Username and full name are required. Username uniqueness is validated server-side using the `users.username` field, with the database UNIQUE constraint retained as additional protection.
+
+### Edit User
+
+Use the Edit action from User Accounts. Existing username and full name are pre-filled. An unchanged username is accepted, while a username used by another record is rejected. Selecting no avatar preserves the existing avatar filename.
+
+### Avatar upload
+
+- Avatar upload is optional and available on User Edit.
+- The form uses `multipart/form-data`.
+- Only valid JPG/JPEG and PNG images are accepted.
+- Maximum size is 2 MB.
+- Files are checked using CodeIgniter upload and image validation rules.
+- A random safe filename is generated; the original client filename is not used.
+- CodeIgniter's GD Image service prepares a centered square image up to 256 × 256 pixels without enlarging smaller images.
+- Prepared files are stored in `public/uploads/avatars/`.
+- Only the generated filename is stored in `users.avatar`.
+- Missing or invalid stored files display `public/assets/images/avatar-placeholder.svg` instead of a broken image.
+
+## Database files
+
+- `database/pos_db.sql` — concise reproducible setup with the TFA3 avatar column.
+- `database/pos_db_export.sql` — MySQL-generated export of the verified working database.
 
 ## MVC structure
 
@@ -119,33 +155,35 @@ database/tasks_today_db.sql
 app/
 |-- Config/Routes.php
 |-- Controllers/
+|   |-- Customers.php
 |   |-- Pages.php
-|   |-- Tasks.php
 |   `-- Users.php
 |-- Models/
-|   |-- TaskModel.php
+|   |-- CustomerModel.php
 |   `-- UserModel.php
 `-- Views/
-    |-- tasks/index.php
-    |-- templates/
-    |-- about.php
-    |-- home.php
-    `-- profile.php
-database/
-`-- tasks_today_db.sql
+    |-- customers/
+    |   |-- edit.php
+    |   |-- form.php
+    |   |-- index.php
+    |   `-- new.php
+    |-- users/
+    |   |-- edit.php
+    |   |-- form.php
+    |   |-- index.php
+    |   `-- new.php
+    `-- templates/
 public/
-`-- assets/css/style.css
+|-- assets/images/avatar-placeholder.svg
+`-- uploads/avatars/
 ```
 
-- `TaskModel::findForDate()` filters tasks by the supplied date using CodeIgniter Model/Query Builder methods.
-- `TaskModel::findAllOrdered()` retrieves all tasks ordered by `task_date`.
-- `UserModel` retrieves the single demonstration user for the Profile page.
-- Controllers prepare database records for the views.
-- Views render the supplied records and do not contain SQL queries.
+Controllers handle validation and workflows, Models perform inserts and updates, and Views render supplied data without SQL queries.
 
 ## Security and repository notes
 
-- Do not commit `.env` or database credentials.
-- Composer dependencies in `vendor/` are excluded and can be restored with `composer install`.
-- Runtime files under `writable/` are excluded.
-- The application intentionally does not include authentication, passwords, roles, or CRUD functionality.
+- CSRF protection is enabled and forms include CSRF tokens.
+- User-provided and database-provided values are escaped in views.
+- `.env` and real credentials are not committed.
+- Generated user uploads are ignored by Git; `.gitkeep` preserves the upload directory.
+- Deployments must point the web document root to `public/` and provide write permission for the avatar directory.

@@ -1,63 +1,60 @@
 <?= view('templates/header') ?>
 
 <div class="content-wrap">
-    <section class="page-intro directory-intro">
+    <section class="page-intro home-intro">
         <div>
-            <span class="eyebrow">Daily focus</span>
-            <h1>Tasks for today</h1>
-            <p><?= esc(date('l, F j, Y', strtotime($today))) ?> &mdash; only tasks scheduled for today are shown here.</p>
+            <span class="eyebrow">Overview</span>
+            <h1>Point-of-sale workspace</h1>
+            <p>Browse customer contact information and staff account details from one focused management interface.</p>
         </div>
-        <div class="record-count" aria-label="<?= esc(count($tasks)) ?> tasks scheduled today">
-            <strong><?= esc(count($tasks)) ?></strong>
-            <span>Due today</span>
+        <div class="intro-actions">
+            <a class="button button-primary" href="<?= site_url('customers') ?>">View customers</a>
+            <a class="button button-secondary" href="<?= site_url('users') ?>">View staff users</a>
         </div>
     </section>
 
-    <section class="table-panel" aria-labelledby="today-task-title">
-        <div class="table-toolbar">
+    <section class="workspace-overview" aria-labelledby="system-overview-title">
+        <div class="overview-copy">
+            <span class="section-kicker">System overview</span>
+            <h2 id="system-overview-title">A focused directory for essential POS accounts.</h2>
+            <p>The application demonstrates a clean CodeIgniter MVC workflow with database-backed account listings, validated forms, editing, and profile-image preparation.</p>
+        </div>
+        <dl class="system-facts">
+            <div><dt>Framework</dt><dd>CodeIgniter 4</dd></div>
+            <div><dt>Data source</dt><dd>MySQL database</dd></div>
+            <div><dt>Architecture</dt><dd>Model &rarr; Controller &rarr; View</dd></div>
+        </dl>
+    </section>
+
+    <section class="directory-section" aria-labelledby="directory-title">
+        <div class="section-heading">
             <div>
-                <span class="section-kicker">Today's schedule</span>
-                <h2 id="today-task-title">Current tasks</h2>
+                <span class="section-kicker">Quick access</span>
+                <h2 id="directory-title">Account directories</h2>
             </div>
-            <span class="data-label">tasks table</span>
+            <p>Open a database-backed directory to review its current records.</p>
         </div>
 
-        <div class="table-scroll" tabindex="0">
-            <table>
-                <caption class="sr-only">Tasks scheduled for today</caption>
-                <thead>
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Task</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Task Date</th>
-                        <th scope="col">Created At</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if ($tasks === []): ?>
-                        <tr>
-                            <td class="empty-state" colspan="5">No tasks are scheduled for today.</td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($tasks as $task): ?>
-                            <tr>
-                                <td><span class="row-id">#<?= esc($task['id']) ?></span></td>
-                                <td><strong><?= esc($task['title']) ?></strong></td>
-                                <td><span class="status-badge"><?= esc(ucwords(str_replace('_', ' ', $task['status']))) ?></span></td>
-                                <td><time datetime="<?= esc($task['task_date'], 'attr') ?>"><?= esc(date('M j, Y', strtotime($task['task_date']))) ?></time></td>
-                                <td><time datetime="<?= esc($task['created_at'], 'attr') ?>"><?= esc(date('M j, Y · g:i A', strtotime($task['created_at']))) ?></time></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+        <div class="directory-grid">
+            <a class="directory-link" href="<?= site_url('customers') ?>">
+                <span class="directory-index" aria-hidden="true">01</span>
+                <span class="directory-copy">
+                    <strong>Customer Accounts</strong>
+                    <span>Review, create, and edit customer contact information.</span>
+                </span>
+                <span class="directory-arrow" aria-hidden="true">&rarr;</span>
+            </a>
+
+            <a class="directory-link" href="<?= site_url('users') ?>">
+                <span class="directory-index" aria-hidden="true">02</span>
+                <span class="directory-copy">
+                    <strong>User Accounts</strong>
+                    <span>Review, create, edit, and manage staff profile pictures.</span>
+                </span>
+                <span class="directory-arrow" aria-hidden="true">&rarr;</span>
+            </a>
         </div>
     </section>
-
-    <div class="page-action">
-        <a class="button button-primary" href="<?= site_url('tasks') ?>">View all tasks</a>
-    </div>
 </div>
 
 <?= view('templates/footer') ?>

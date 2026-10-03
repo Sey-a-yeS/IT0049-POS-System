@@ -45,6 +45,10 @@ $RECYCLE.BIN/
 .vagrant
 Vagrantfile
 
+# User-uploaded avatars (keep the public directory in the repository)
+public/uploads/avatars/*
+!public/uploads/avatars/.gitkeep
+
 #-------------------------
 # Temporary Files
 #-------------------------

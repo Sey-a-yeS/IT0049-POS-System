@@ -40,6 +40,7 @@ CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
   `full_name` varchar(100) NOT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
   `created_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
@@ -48,7 +49,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'acruz','Andrea Cruz','2026-09-01 08:00:00'),(2,'jnavarro','Joshua Navarro','2026-09-02 08:30:00'),(3,'mpascual','Mikaela Pascual','2026-09-03 09:00:00'),(4,'rgonzales','Rafael Gonzales','2026-09-04 09:30:00'),(5,'tgarcia','Trisha Garcia','2026-09-05 10:00:00');
+INSERT INTO `users` VALUES (1,'acruz','Andrea Cruz',NULL,'2026-09-01 08:00:00'),(2,'jnavarro','Joshua Navarro',NULL,'2026-09-02 08:30:00'),(3,'mpascual','Mikaela Pascual',NULL,'2026-09-03 09:00:00'),(4,'rgonzales','Rafael Gonzales',NULL,'2026-09-04 09:30:00'),(5,'tgarcia','Trisha Garcia',NULL,'2026-09-05 10:00:00');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

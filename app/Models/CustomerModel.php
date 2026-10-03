@@ -8,6 +8,7 @@ class CustomerModel extends Model
 {
     protected $table      = 'customers';
     protected $primaryKey = 'id';
+    protected $returnType = 'array';
 
     protected $allowedFields = [
         'full_name',
