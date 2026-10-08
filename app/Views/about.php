@@ -12,8 +12,14 @@
     <section class="about-section">
         <div class="about-block">
             <span class="section-kicker">Assessment context</span>
-            <h2>Technical Formative Assessment 3</h2>
-            <p>The application was created for IT0049 &mdash; Web System Technologies. It extends the database-backed account directories with validated create and edit forms plus safe user avatar uploads.</p>
+            <h2>Technical Formative Assessment 4</h2>
+            <p>The application was created for IT0049 &mdash; Web System Technologies by Isaiah Ezekiel P. Vicencio. It extends the TFA3 database-backed account workflows with password hashing, session authentication, protected routes, and secure logout.</p>
+        </div>
+
+        <div class="about-block">
+            <span class="section-kicker">Access control</span>
+            <h2>Verified staff sessions</h2>
+            <p>CodeIgniter validates login requests, verifies stored password hashes, regenerates the session identifier, and applies an authentication Filter to every customer and user management route.</p>
         </div>
 
         <div class="about-block">

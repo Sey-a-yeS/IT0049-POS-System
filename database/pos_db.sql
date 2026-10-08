@@ -1,5 +1,7 @@
--- IT0049 Technical Formative Assessment 2
--- Recreates the POS database tables and their sample records.
+-- IT0049 Technical Formative Assessment 4
+-- Recreates the POS database tables and TFA3 sample records.
+-- Password values remain NULL here; initialize them privately with
+-- php spark auth:set-password --all after import.
 
 CREATE DATABASE IF NOT EXISTS pos_db;
 USE pos_db;
@@ -26,6 +28,7 @@ CREATE TABLE users (
     username VARCHAR(50) NOT NULL UNIQUE,
     full_name VARCHAR(100) NOT NULL,
     avatar VARCHAR(255) NULL,
+    password VARCHAR(255) NULL,
     created_at DATETIME NOT NULL
 );
 

@@ -17,7 +17,10 @@ class Users extends BaseController
     public function index(): string
     {
         $userModel = new UserModel();
-        $users     = $userModel->orderBy('id', 'ASC')->findAll();
+        $users     = $userModel
+            ->select('id, username, full_name, avatar, created_at')
+            ->orderBy('id', 'ASC')
+            ->findAll();
 
         foreach ($users as &$user) {
             $user['avatar_url'] = $this->avatarUrl($user['avatar'] ?? null);
@@ -59,13 +62,15 @@ class Users extends BaseController
         ]);
 
         return redirect()->to(site_url('users'))
-            ->with('success', 'User created successfully.');
+            ->with('success', 'User created successfully. Initialize its login password with the local auth:set-password command.');
     }
 
     public function edit(int $id): string
     {
         $userModel = new UserModel();
-        $user      = $userModel->find($id);
+        $user      = $userModel
+            ->select('id, username, full_name, avatar, created_at')
+            ->find($id);
 
         if ($user === null) {
             throw PageNotFoundException::forPageNotFound('User not found.');
@@ -83,7 +88,9 @@ class Users extends BaseController
     public function update(int $id): RedirectResponse
     {
         $userModel = new UserModel();
-        $user      = $userModel->find($id);
+        $user      = $userModel
+            ->select('id, username, full_name, avatar, created_at')
+            ->find($id);
 
         if ($user === null) {
             throw PageNotFoundException::forPageNotFound('User not found.');

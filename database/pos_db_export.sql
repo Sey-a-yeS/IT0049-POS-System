@@ -1,4 +1,8 @@
 
+-- IT0049 Technical Formative Assessment 4 database export.
+-- Password hashes are intentionally omitted; initialize them privately with
+-- php spark auth:set-password --all after import.
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -41,6 +45,7 @@ CREATE TABLE `users` (
   `username` varchar(50) NOT NULL,
   `full_name` varchar(100) NOT NULL,
   `avatar` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
   `created_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
@@ -49,7 +54,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'acruz','Andrea Cruz',NULL,'2026-09-01 08:00:00'),(2,'jnavarro','Joshua Navarro',NULL,'2026-09-02 08:30:00'),(3,'mpascual','Mikaela Pascual',NULL,'2026-09-03 09:00:00'),(4,'rgonzales','Rafael Gonzales',NULL,'2026-09-04 09:30:00'),(5,'tgarcia','Trisha Garcia',NULL,'2026-09-05 10:00:00');
+INSERT INTO `users` VALUES (1,'acruz','Andrea Cruz',NULL,NULL,'2026-09-01 08:00:00'),(2,'jnavarro','Joshua Navarro',NULL,NULL,'2026-09-02 08:30:00'),(3,'mpascual','Mikaela Pascual',NULL,NULL,'2026-09-03 09:00:00'),(4,'rgonzales','Rafael Gonzales',NULL,NULL,'2026-09-04 09:30:00'),(5,'tgarcia','Trisha Garcia',NULL,NULL,'2026-09-05 10:00:00');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -61,4 +66,3 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-

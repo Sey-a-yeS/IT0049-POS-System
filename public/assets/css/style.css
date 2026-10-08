@@ -340,6 +340,21 @@ code {
     letter-spacing: 0.025em;
 }
 
+.topbar-meta strong {
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.logout-form {
+    margin: 0;
+}
+
 .main-content {
     flex: 1;
     padding: clamp(32px, 5vw, 60px) clamp(24px, 4vw, 54px) 64px;
@@ -425,6 +440,19 @@ code {
 .button-secondary:hover {
     border-color: #aeb5ad;
     background: var(--surface);
+}
+
+.button-quiet {
+    min-height: 34px;
+    padding: 6px 11px;
+    border-color: var(--border-strong);
+    background: var(--surface);
+    color: var(--text-secondary);
+}
+
+.button-quiet:hover {
+    border-color: #aeb5ad;
+    color: var(--primary);
 }
 
 .brand:focus-visible,
@@ -824,6 +852,7 @@ time {
 .form-field input[type="text"],
 .form-field input[type="email"],
 .form-field input[type="tel"],
+.form-field input[type="password"],
 .form-field input[type="file"] {
     width: 100%;
     min-height: 44px;
@@ -834,6 +863,14 @@ time {
     color: var(--text);
     font: inherit;
     transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.login-shell {
+    width: min(100%, 620px);
+}
+
+.login-panel {
+    margin-top: var(--space-8);
 }
 
 .form-field input[type="file"] {
@@ -1114,6 +1151,14 @@ time {
 
     .topbar-meta {
         display: none;
+    }
+
+    .topbar-actions {
+        margin-left: auto;
+    }
+
+    .logout-form .button {
+        flex: 0 0 auto;
     }
 
     .main-content {

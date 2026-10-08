@@ -1,3 +1,7 @@
+<?php
+$isLoggedIn = session('isLoggedIn') === true;
+$authUsername = (string) (session('authUsername') ?? '');
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,37 +33,57 @@
                             <span>Home</span>
                         </a>
                     </li>
-                    <li>
-                        <a class="nav-link<?= $activePage === 'customers' ? ' active' : '' ?>" href="<?= site_url('customers') ?>"<?= $activePage === 'customers' ? ' aria-current="page"' : '' ?>>
-                            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19v-1.5A4.5 4.5 0 0 1 8 13h2a4.5 4.5 0 0 1 4.5 4.5V19M16 6h5M18.5 3.5v5"/></svg>
-                            <span>Customer Accounts</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a class="nav-link<?= $activePage === 'users' ? ' active' : '' ?>" href="<?= site_url('users') ?>"<?= $activePage === 'users' ? ' aria-current="page"' : '' ?>>
-                            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5.5 20v-2A4.5 4.5 0 0 1 10 13.5h4a4.5 4.5 0 0 1 4.5 4.5v2"/></svg>
-                            <span>User Accounts</span>
-                        </a>
-                    </li>
+                    <?php if ($isLoggedIn): ?>
+                        <li>
+                            <a class="nav-link<?= $activePage === 'customers' ? ' active' : '' ?>" href="<?= site_url('customers') ?>"<?= $activePage === 'customers' ? ' aria-current="page"' : '' ?>>
+                                <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19v-1.5A4.5 4.5 0 0 1 8 13h2a4.5 4.5 0 0 1 4.5 4.5V19M16 6h5M18.5 3.5v5"/></svg>
+                                <span>Customer Accounts</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link<?= $activePage === 'users' ? ' active' : '' ?>" href="<?= site_url('users') ?>"<?= $activePage === 'users' ? ' aria-current="page"' : '' ?>>
+                                <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5.5 20v-2A4.5 4.5 0 0 1 10 13.5h4a4.5 4.5 0 0 1 4.5 4.5v2"/></svg>
+                                <span>User Accounts</span>
+                            </a>
+                        </li>
+                    <?php endif; ?>
                     <li>
                         <a class="nav-link<?= $activePage === 'about' ? ' active' : '' ?>" href="<?= site_url('about') ?>"<?= $activePage === 'about' ? ' aria-current="page"' : '' ?>>
                             <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>
                             <span>About</span>
                         </a>
                     </li>
+                    <?php if (! $isLoggedIn): ?>
+                        <li>
+                            <a class="nav-link<?= $activePage === 'login' ? ' active' : '' ?>" href="<?= site_url('login') ?>"<?= $activePage === 'login' ? ' aria-current="page"' : '' ?>>
+                                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10 5H5v14h5M13 8l4 4-4 4M8 12h9"/></svg>
+                                <span>Staff Login</span>
+                            </a>
+                        </li>
+                    <?php endif; ?>
                 </ul>
             </nav>
 
             <div class="sidebar-meta">
                 <span>IT0049</span>
-                <strong>Technical Formative Assessment 3</strong>
+                <strong>Technical Formative Assessment 4</strong>
             </div>
         </aside>
 
         <div class="workspace">
             <header class="topbar">
                 <p class="breadcrumb"><span>POS Management</span><span aria-hidden="true">/</span><strong><?= esc($title) ?></strong></p>
-                <p class="topbar-meta">CodeIgniter 4 &middot; MySQL</p>
+                <div class="topbar-actions">
+                    <?php if ($isLoggedIn): ?>
+                        <span class="topbar-meta">Signed in as <strong><?= esc($authUsername) ?></strong></span>
+                        <form class="logout-form" action="<?= site_url('logout') ?>" method="post">
+                            <?= csrf_field() ?>
+                            <button class="button button-quiet" type="submit">Log out</button>
+                        </form>
+                    <?php else: ?>
+                        <p class="topbar-meta">Public area &middot; CodeIgniter 4</p>
+                    <?php endif; ?>
+                </div>
             </header>
 
             <main class="main-content" id="main-content">
