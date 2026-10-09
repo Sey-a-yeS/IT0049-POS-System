@@ -1,5 +1,7 @@
--- IT0049 Technical Summative Assessment 1
+-- IT0049 Technical Summative Assessment 2
 -- Tasks for Today Management System database setup
+-- After importing, set the demo user's password interactively with:
+-- php spark auth:set-password isaiahvicencio
 
 CREATE DATABASE IF NOT EXISTS tasks_today_db;
 USE tasks_today_db;
@@ -10,6 +12,7 @@ CREATE TABLE tasks (
     title VARCHAR(150) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'pending',
     task_date DATE NOT NULL,
+    is_archived TINYINT(1) NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL
 );
 
@@ -30,6 +33,7 @@ CREATE TABLE users (
     username VARCHAR(50) NOT NULL UNIQUE,
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NULL,
     created_at DATETIME NOT NULL
 );
 

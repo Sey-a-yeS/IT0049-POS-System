@@ -12,14 +12,14 @@
     <section class="about-section">
         <div class="about-block">
             <span class="section-kicker">Assessment context</span>
-            <h2>Technical Summative Assessment 1</h2>
-            <p>This application was developed for IT0049 &mdash; Web System Technologies.</p>
+            <h2>Technical Summative Assessment 2</h2>
+            <p>This application was developed for IT0049 &mdash; Web System Technologies. It extends TSA1 with authenticated task creation, editing, validation, and non-destructive archiving.</p>
         </div>
 
         <div class="about-block">
             <span class="section-kicker">Developer</span>
             <h2>Isaiah Ezekiel P. Vicencio</h2>
-            <p>The system demonstrates database-backed task filtering, ordered task retrieval, and a single user profile using CodeIgniter MVC conventions.</p>
+            <p>The system demonstrates public database-backed task views, a single user profile, session authentication, validated management workflows, and soft deletion using CodeIgniter MVC conventions.</p>
         </div>
 
         <div class="about-block">

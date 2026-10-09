@@ -340,6 +340,22 @@ code {
     letter-spacing: 0.025em;
 }
 
+.topbar-meta strong {
+    color: var(--text-secondary);
+    font-weight: 650;
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.logout-form,
+.archive-form {
+    margin: 0;
+}
+
 .main-content {
     flex: 1;
     padding: clamp(32px, 5vw, 60px) clamp(24px, 4vw, 54px) 64px;
@@ -399,6 +415,8 @@ code {
     padding: 9px 16px;
     border: 1px solid transparent;
     border-radius: var(--radius-small);
+    cursor: pointer;
+    font-family: inherit;
     font-size: 0.82rem;
     font-weight: 650;
     text-decoration: none;
@@ -425,12 +443,32 @@ code {
     background: var(--surface);
 }
 
+.button-quiet {
+    min-height: 34px;
+    padding: 6px 11px;
+    border-color: var(--border-strong);
+    background: var(--surface);
+    color: var(--text-secondary);
+}
+
+.button-quiet:hover {
+    border-color: #aeb5ad;
+    color: var(--text);
+}
+
 .brand:focus-visible,
 .nav-link:focus-visible,
 .button:focus-visible,
 .directory-link:focus-visible,
 .table-scroll:focus-visible,
 td a:focus-visible {
+    outline: 3px solid rgba(199, 149, 63, 0.48);
+    outline-offset: 2px;
+}
+
+input:focus-visible,
+select:focus-visible,
+.action-link:focus-visible {
     outline: 3px solid rgba(199, 149, 63, 0.48);
     outline-offset: 2px;
 }
@@ -632,6 +670,12 @@ td a:focus-visible {
     font-size: 1.08rem;
 }
 
+.toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
 .data-label {
     padding: 5px 8px;
     border: 1px solid #ccd9d1;
@@ -743,6 +787,146 @@ time {
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.025em;
+}
+
+.row-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.action-link {
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    background: transparent;
+    color: var(--primary);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 650;
+    line-height: 1.4;
+    text-decoration: none;
+}
+
+.action-link:hover {
+    border-bottom-color: currentColor;
+}
+
+.action-link-danger {
+    color: var(--danger);
+}
+
+.flash-message {
+    margin-bottom: var(--space-6);
+    padding: 13px 16px;
+    border: 1px solid #b9d4c5;
+    border-radius: var(--radius-small);
+    background: #edf6f0;
+    color: var(--success);
+    font-size: 0.85rem;
+    font-weight: 650;
+}
+
+.form-panel {
+    margin-top: var(--space-8);
+    padding: clamp(24px, 4vw, 38px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.form-panel-heading {
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-5);
+    border-bottom: 1px solid var(--border);
+}
+
+.form-panel-heading h2 {
+    margin: 6px 0 0;
+}
+
+.account-form {
+    display: grid;
+    gap: var(--space-5);
+}
+
+.form-field {
+    display: grid;
+    gap: 7px;
+}
+
+.form-field label {
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.form-field label span {
+    color: var(--danger);
+}
+
+.form-field input,
+.form-field select {
+    width: 100%;
+    min-height: 44px;
+    padding: 9px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-small);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+}
+
+.form-field input:hover,
+.form-field select:hover {
+    border-color: #aeb5ad;
+}
+
+.form-field small {
+    color: var(--text-muted);
+    font-size: 0.74rem;
+}
+
+.form-field.has-error input,
+.form-field.has-error select {
+    border-color: var(--danger);
+}
+
+.field-error {
+    color: var(--danger);
+    font-size: 0.76rem;
+    font-weight: 650;
+}
+
+.form-errors {
+    margin-bottom: var(--space-5);
+    padding: 13px 16px;
+    border: 1px solid #e2b9b6;
+    border-radius: var(--radius-small);
+    background: #fbefee;
+    color: #7d332e;
+    font-size: 0.8rem;
+}
+
+.form-errors ul {
+    margin: 7px 0 0;
+    padding-left: 20px;
+}
+
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding-top: var(--space-2);
+}
+
+.login-shell {
+    width: min(100%, 720px);
+}
+
+.login-panel {
+    max-width: 560px;
 }
 
 .page-action {
@@ -1092,6 +1276,20 @@ time {
     .table-toolbar {
         align-items: flex-start;
         padding: 16px 18px;
+    }
+
+    .toolbar-actions {
+        width: 100%;
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .toolbar-actions .button {
+        width: 100%;
+    }
+
+    .form-panel {
+        padding: 22px 18px;
     }
 
     th,

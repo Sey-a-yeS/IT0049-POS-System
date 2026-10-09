@@ -13,7 +13,9 @@ class Users extends BaseController
         $data = [
             'title'      => 'Profile',
             'activePage' => 'profile',
-            'user'       => $userModel->first(),
+            'user'       => $userModel
+                ->select('id, username, full_name, email, created_at')
+                ->first(),
         ];
 
         return view('profile', $data);

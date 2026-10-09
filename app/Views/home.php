@@ -19,7 +19,12 @@
                 <span class="section-kicker">Today's schedule</span>
                 <h2 id="today-task-title">Current tasks</h2>
             </div>
-            <span class="data-label">tasks table</span>
+            <div class="toolbar-actions">
+                <span class="data-label">active tasks</span>
+                <?php if (session('isLoggedIn') === true): ?>
+                    <a class="button button-primary" href="<?= site_url('tasks/new') ?>">New Task</a>
+                <?php endif; ?>
+            </div>
         </div>
 
         <div class="table-scroll" tabindex="0">
