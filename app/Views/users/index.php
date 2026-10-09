@@ -4,6 +4,9 @@
     <?php if ($success = session('success')): ?>
         <div class="flash-message" role="status"><?= esc($success) ?></div>
     <?php endif; ?>
+    <?php if ($error = session('error')): ?>
+        <div class="form-errors" role="alert"><strong><?= esc($error) ?></strong></div>
+    <?php endif; ?>
 
     <section class="page-intro directory-intro">
         <div>
@@ -55,7 +58,7 @@
                                     <td><span class="username"><?= esc($user['username']) ?></span></td>
                                     <td><strong><?= esc($user['full_name']) ?></strong></td>
                                     <td><time datetime="<?= esc($user['created_at'], 'attr') ?>"><?= esc(date('M j, Y · g:i A', strtotime($user['created_at']))) ?></time></td>
-                                    <td><a class="action-link" href="<?= site_url('users/' . $user['id'] . '/edit') ?>">Edit</a></td>
+                                    <td><div class="row-actions"><a class="action-link" href="<?= site_url('users/' . $user['id'] . '/edit') ?>">Edit</a><form action="<?= site_url('users/' . $user['id'] . '/archive') ?>" method="post"><?= csrf_field() ?><button class="action-link action-link-danger" type="submit" data-confirm="Archive this staff account? Historical sales will remain unchanged.">Archive</button></form></div></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>

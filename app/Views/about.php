@@ -5,21 +5,21 @@
         <div>
         <span class="eyebrow">About the project</span>
         <h1>CodeIgniter 4 POS System</h1>
-        <p>This learning project demonstrates how database records move through CodeIgniter models, controllers, and views in a simple MVC application.</p>
+        <p>A complete retail operations workspace for secure inventory, customer, staff, and single-product sales management.</p>
         </div>
     </section>
 
     <section class="about-section">
         <div class="about-block">
             <span class="section-kicker">Assessment context</span>
-            <h2>Technical Formative Assessment 4</h2>
-            <p>The application was created for IT0049 &mdash; Web System Technologies by Isaiah Ezekiel P. Vicencio. It extends the TFA3 database-backed account workflows with password hashing, session authentication, protected routes, and secure logout.</p>
+            <h2>The Complete Point-of-Sale System</h2>
+            <p>The Midterm Project was created for IT0049 &mdash; Web System Technologies by Isaiah Ezekiel P. Vicencio and extends the TFA1–TFA4 foundation into an integrated sales application.</p>
         </div>
 
         <div class="about-block">
             <span class="section-kicker">Access control</span>
             <h2>Verified staff sessions</h2>
-            <p>CodeIgniter validates login requests, verifies stored password hashes, regenerates the session identifier, and applies an authentication Filter to every customer and user management route.</p>
+            <p>CodeIgniter validates login requests, verifies stored password hashes, regenerates the session identifier, and protects every product, customer, staff, and sales-management route.</p>
         </div>
 
         <div class="about-block">
@@ -39,9 +39,9 @@
         </div>
 
         <div class="about-block">
-            <span class="section-kicker">Editable records</span>
-            <h2>Validated account workflows</h2>
-            <p>Customer and user records are created and updated through CodeIgniter models. Server-side validation protects required fields and unique usernames, while avatar uploads are prepared as display-ready JPG or PNG files.</p>
+            <span class="section-kicker">Transaction integrity</span>
+            <h2>Reliable stock movement</h2>
+            <p>Every sale uses the database product price, a conditional stock decrement, and a single database transaction so insufficient inventory cannot create partial or negative-stock sales.</p>
         </div>
     </section>
 </div>

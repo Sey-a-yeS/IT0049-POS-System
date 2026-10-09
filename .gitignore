@@ -48,6 +48,8 @@ Vagrantfile
 # User-uploaded avatars (keep the public directory in the repository)
 public/uploads/avatars/*
 !public/uploads/avatars/.gitkeep
+public/uploads/products/*
+!public/uploads/products/.gitkeep
 
 #-------------------------
 # Temporary Files

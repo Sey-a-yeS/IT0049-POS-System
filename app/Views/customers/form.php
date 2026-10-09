@@ -1,7 +1,7 @@
 <?php
-$fullName = old('full_name', $customer['full_name'] ?? '');
-$email    = old('email', $customer['email'] ?? '');
-$phone    = old('phone', $customer['phone'] ?? '');
+$fullName = $errors !== [] ? old('full_name', $customer['full_name'] ?? '') : ($customer['full_name'] ?? '');
+$email    = $errors !== [] ? old('email', $customer['email'] ?? '') : ($customer['email'] ?? '');
+$phone    = $errors !== [] ? old('phone', $customer['phone'] ?? '') : ($customer['phone'] ?? '');
 ?>
 
 <?php if ($errors !== []): ?>

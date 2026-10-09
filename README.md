@@ -1,56 +1,55 @@
-# CodeIgniter 4 POS System
+# IT0049 Midterm Point-of-Sale System
 
-## IT0049 Technical Formative Assessment 4
-
-This Point-of-Sale application was developed for **IT0049 - Web System Technologies** and extended for **Technical Formative Assessment 4: Who's Allowed In? Sessions and Authentication**.
-
-TFA4 preserves the TFA3 customer and staff-account workflows while requiring an authenticated staff session for every customer and user management page. The public Home, About, and Login pages remain available without authentication.
+This repository contains **The Complete Point-of-Sale System**, developed for the IT0049 — Web System Technologies Midterm Project. It extends the original TFA1–TFA4 CodeIgniter application into one database-backed management console for products, customers, staff, authentication, stock-controlled sales, and sales history.
 
 ## Features
 
-- Database-backed Customer Accounts and User Accounts
-- Validated customer and user create/edit workflows from TFA3
-- Optional JPG/PNG avatar upload with a 2 MB limit and a local placeholder
-- Password hashes stored in `users.password` using PHP `password_hash()`
-- Login verification using PHP `password_verify()`
-- Session ID regeneration after a successful login
-- CodeIgniter `AuthFilter` protection on all customer/user GET and POST routes
-- POST-only, CSRF-protected logout that destroys the authenticated session
-- CSRF protection on every form and escaped output in views
-- Short session-based delay after repeated unsuccessful login attempts
-- No-store response headers on protected account-management pages
+- Authenticated operations dashboard using real database totals and recent sales
+- Product create, list, edit, archive, stock tracking, and prepared product images
+- Customer create, list, edit, validation, and safe archive
+- Staff create, list, edit, archive, password hashing, and prepared avatars
+- Session authentication with protected GET and POST management routes
+- Single-product sales with optional customers and authenticated staff attribution
+- Authoritative server-side totals using the product price stored in MySQL
+- Transactional, concurrency-safe inventory deduction that prevents overselling
+- Joined sales history with product, customer, staff, quantity, total, and timestamp
+- CSRF-protected forms, escaped output, responsive layouts, and local placeholders
 
-Passwords are not created or edited in the ordinary User Accounts forms. A local CLI command initializes credentials deliberately without echoing password input.
+Archiving is used instead of physical deletion so product, customer, and staff names remain available to historical sales. The minimal `is_archived` columns are intentional extensions to the professor's four-table schema.
+
+## Technology stack
+
+- CodeIgniter 4 (tested locally with 4.7.4)
+- PHP 8.2 or newer (tested locally with PHP 8.5.10)
+- MySQL or MariaDB using the MySQLi driver
+- Server-rendered HTML, project CSS, and small progressive-enhancement JavaScript
+- CodeIgniter Image with the PHP GD extension
 
 ## Requirements
 
-- PHP 8.2 or newer
-- Composer
-- MySQL or MariaDB
-- PHP extensions required by CodeIgniter 4, including `intl`, `mbstring`, `mysqli`, and `gd`
-- Write access to `writable/` and `public/uploads/avatars/`
+- PHP 8.2+
+- Composer 2
+- MySQL 8+ or a compatible MariaDB release
+- PHP extensions required by CodeIgniter, including `intl`, `mbstring`, `mysqli`, and `gd`
+- A web server whose document root can point to `public/`
+- Write permission for `writable/`, `public/uploads/avatars/`, and `public/uploads/products/`
 
 ## Local installation
 
-1. Enter the project directory:
+1. Enter the application directory and install dependencies:
 
    ```bash
    cd pos-system
-   ```
-
-2. Install PHP dependencies:
-
-   ```bash
    composer install
    ```
 
-3. Create the local environment file:
+2. Create the untracked environment file:
 
    ```bash
    cp env .env
    ```
 
-4. Configure the application URL and your own local MySQL connection in `.env`:
+3. Configure your own local values in `.env`:
 
    ```ini
    CI_ENVIRONMENT = development
@@ -66,147 +65,157 @@ Passwords are not created or edited in the ordinary User Accounts forms. A local
    database.default.port = 3306
    ```
 
-   `.env` is ignored by Git. Never commit it or copy private credentials into tracked documentation.
+   `.env` is ignored by Git. Do not put database credentials, plaintext passwords, or production secrets in tracked files.
 
-5. Import the reproducible database setup:
+4. Reproduce the database from the tracked SQL setup:
 
    ```bash
    mysql --host=127.0.0.1 --port=3306 -u your_mysql_user -p < database/pos_db.sql
    ```
 
-   The setup contains the TFA3 customer/user data, the existing `avatar` column, and the TFA4 nullable `password VARCHAR(255)` column. Tracked SQL files intentionally contain `NULL` password values so no usable password hashes or credentials are published.
+   The import creates `products`, `customers`, `users`, and `sales`, their three sales foreign keys, five sample products, five sample customers, and five sample staff records. Sample staff passwords initially contain an unusable locked marker—not a shared demo password or a real credential.
 
-   For an existing TFA3 database instead of a fresh import, apply the migration:
+   When upgrading an existing TFA database instead, preserve it and run:
 
    ```bash
    php spark migrate
    ```
 
-6. Initialize every existing staff password locally:
+5. Initialize credentials privately in an interactive terminal:
 
    ```bash
    php spark auth:set-password --all
    ```
 
-   The command prompts separately for each existing username, requires at least 12 characters, hides terminal input, confirms each password, and stores only `password_hash()` output. It does not print or retain plaintext passwords. To initialize or change one user later, run:
+   Or initialize one staff account:
 
    ```bash
    php spark auth:set-password username_here
    ```
 
-   A newly created User Account cannot sign in until this local command has initialized its password. This avoids a shared or hard-coded default credential.
+   The command requires at least 12 characters, hides input, confirms it, and stores only a `password_hash()` result. No working password is included in this repository.
 
-7. Ensure the avatar upload directory is writable:
+6. Ensure runtime and upload directories are writable by the PHP process:
 
    ```bash
-   chmod 755 public/uploads/avatars
+   chmod 755 writable public/uploads/avatars public/uploads/products
    ```
 
-8. Start the local development server:
+7. Start the development server:
 
    ```bash
    php spark serve
    ```
 
-9. Open [http://localhost:8080/](http://localhost:8080/) and use `/login` for staff access.
+8. Open [http://localhost:8080/login](http://localhost:8080/login) and sign in with a staff credential you initialized.
 
-## Routes and access rules
+## Main routes
 
-| Method | URL | Access | Purpose |
+| Method | Route | Access | Purpose |
 | --- | --- | --- | --- |
-| GET | `/` | Public | Home |
-| GET | `/about` | Public | About |
 | GET | `/login` | Public | Login form |
-| POST | `/login` | Public + CSRF | Validate credentials and create session |
-| POST | `/logout` | Authenticated + CSRF | Destroy session and return to Login |
-| GET | `/customers` | Authenticated | Customer Accounts |
-| GET | `/customers/new` | Authenticated | New Customer form |
-| POST | `/customers` | Authenticated + CSRF | Create customer |
-| GET | `/customers/{id}/edit` | Authenticated | Edit Customer form |
-| POST | `/customers/{id}` | Authenticated + CSRF | Update customer |
-| GET | `/users` | Authenticated | User Accounts |
-| GET | `/users/new` | Authenticated | New User form |
-| POST | `/users` | Authenticated + CSRF | Create user |
-| GET | `/users/{id}/edit` | Authenticated | Edit User/avatar form |
-| POST | `/users/{id}` | Authenticated + CSRF | Update user/avatar |
+| POST | `/login` | Public + CSRF | Authenticate staff |
+| GET | `/about` | Public | Project and developer information |
+| POST | `/logout` | Authenticated + CSRF | Destroy the login session |
+| GET | `/` | Authenticated | Operations dashboard |
+| GET/POST | `/products...` | Authenticated + CSRF on POST | Product management and archive |
+| GET/POST | `/customers...` | Authenticated + CSRF on POST | Customer management and archive |
+| GET/POST | `/users...` | Authenticated + CSRF on POST | Staff management and archive |
+| GET | `/sales/new` | Authenticated | Record Sale form |
+| POST | `/sales` | Authenticated + CSRF | Atomically record a sale |
+| GET | `/sales` | Authenticated | Joined sales history |
 
-Unauthenticated protected GET requests remember the requested customer/user path and redirect to `/login`. After successful authentication, the application returns to that safe internal path. Unauthenticated writes are stopped by the Filter and are never executed.
+Run `php spark routes` for the complete route table. Automatic routing is disabled.
 
-## Authentication workflow
+## Management workflows
 
-1. `Auth::authenticate()` validates non-empty username/password input.
-2. `UserModel` retrieves only the fields needed for authentication.
-3. `password_verify()` compares the submitted password with the stored hash.
-4. Invalid usernames and passwords receive the same general error message.
-5. Successful login regenerates the session ID and stores only the user ID, username, and login-state flag.
-6. `AuthFilter` checks that login state before the protected controller runs.
-7. Logout is a POST request with a CSRF token; it removes authentication state, destroys the session, and redirects to `/login`.
+### Products
 
-The login form never repopulates the password. Customer/User listings and edit controllers explicitly exclude the password column, and no view displays a hash.
+Product forms validate a required 100-character name, nonnegative two-decimal price, and nonnegative integer stock. Optional JPG/PNG images are checked for upload size, extension, MIME type, and genuine image content, assigned random filenames, and prepared to 720 × 540 pixels. Only the filename is stored. Archived products are hidden from the catalog and cannot be sold, but remain linked to old sales.
 
-## Existing TFA3 workflows
+### Customers
 
-- New Customer validates full name and email and preserves non-sensitive old input after failure.
-- Edit Customer updates the selected database record through `CustomerModel`.
-- New User validates required fields and unique usernames; it does not ask for an authentication password.
-- Edit User preserves an unchanged username and supports an optional avatar replacement.
-- Avatar files use random filenames, image validation, centered square preparation, and the local placeholder fallback.
+Customer forms validate required names and email format and preserve non-sensitive input after validation failures. Archived customers no longer appear in new-sale choices, while historical transactions retain their customer reference. A sale may also be recorded as walk-in with no customer.
 
-## Database and source structure
+### Staff
+
+Staff creation requires a unique username, full name, and confirmed password of at least 12 characters. Passwords are hashed before storage. On edit, a blank password keeps the existing hash. Optional JPG/PNG avatars use genuine-image validation, random filenames, and a 256 × 256 prepared image. The current authenticated account cannot archive itself.
+
+### Record Sale and inventory safety
+
+The browser preview is informational only. `SaleService` reloads the active product, uses the database price, calculates the total in decimal cents, and gets `sold_by` from the authenticated session. Within one database transaction it performs a conditional stock decrement (`stock_quantity >= requested quantity`) and inserts exactly one sale. Any invalid relation, insufficient stock, or database failure rolls back the operation. Redirect-after-success prevents refresh-based duplicate submission.
+
+### Sales History
+
+`SaleModel` retrieves sales with joined product, customer, and staff names in one query and sorts newest first. Walk-in sales receive a clear label. Archived related records remain visible because rows are deactivated rather than deleted.
+
+## MVC structure
 
 ```text
 app/
-|-- Commands/SetUserPassword.php
-|-- Config/
-|   |-- Filters.php
-|   `-- Routes.php
-|-- Controllers/
-|   |-- Auth.php
-|   |-- Customers.php
-|   |-- Pages.php
-|   `-- Users.php
-|-- Database/Migrations/2026-10-08-143500_AddPasswordToUsers.php
-|-- Filters/AuthFilter.php
-|-- Models/
-|   |-- CustomerModel.php
-|   `-- UserModel.php
-`-- Views/
-    |-- auth/login.php
-    |-- customers/
-    |-- users/
-    `-- templates/
-database/
-|-- pos_db.sql
-`-- pos_db_export.sql
+├── Commands/SetUserPassword.php
+├── Controllers/{Auth,Pages,Products,Customers,Users,Sales}.php
+├── Filters/AuthFilter.php
+├── Models/{Product,Customer,User,Sale}Model.php
+├── Services/SaleService.php
+├── Database/Migrations/
+└── Views/{auth,products,customers,users,sales,templates}/
+database/pos_db.sql
 public/
-|-- assets/
-`-- uploads/avatars/
+├── assets/{css,images,js}/
+└── uploads/{avatars,products}/
 ```
 
-Controllers coordinate validation and workflows, Models perform database access, the Filter enforces route access, and Views render supplied data without SQL.
+Controllers handle requests and validation, Models own database queries, `SaleService` owns transactional stock logic, `AuthFilter` enforces access, and Views contain presentation only—no raw SQL.
 
-## Deployment requirements
+## Upload storage
 
-The assessment requires a hosted working application; `localhost:8080` is only local verification. Deployment is a separate manual step and must not be performed without the owner's authorization.
+- Product files: `public/uploads/products/`
+- Staff avatars: `public/uploads/avatars/`
+- Generated uploads are ignored by Git; `.gitkeep` preserves required directories.
+- Missing files use tracked local placeholders.
+- A real host must provide persistent storage for both upload directories across deployments.
 
-For hosting:
+## Security considerations
 
-- Point the web document root to `public/`, not the repository root.
-- Use a production MySQL database and private environment variables.
-- Set `CI_ENVIRONMENT = production`.
-- Set the real HTTPS `app.baseURL` and enable `app.forceGlobalSecureRequests = true`.
-- Enable secure session/CSRF cookies with `cookie.secure = true`; retain `cookie.httponly = true` and `cookie.samesite = Lax`.
-- Keep `.env`, database credentials, password hashes, and demo plaintext credentials out of Git.
-- Make `writable/` and `public/uploads/avatars/` writable by the web process.
-- Run `php spark migrate` and initialize hosted demo credentials privately with `php spark auth:set-password`.
-- Disable development debug output and confirm login/logout over HTTPS.
+- All management GET and POST routes require an active staff session.
+- Global CSRF filtering protects state-changing forms.
+- Login uses `password_verify()` and regenerates the session ID.
+- Logout is POST-only and destroys the session.
+- Archived/deleted-session staff are rejected by `AuthFilter`.
+- Views escape database and request output.
+- Password fields are never repopulated, and hashes are never displayed.
+- Uploaded files are restricted to validated images and generated filenames.
+- Sales ignore browser-supplied totals or staff IDs.
+- `.env`, generated uploads, cache files, and secrets must stay out of Git.
 
-Do not publish demo credentials in this README or in a public SQL export.
+## Production deployment
 
-## Repository notes
+Local verification is not proof of a live deployment. For a PHP/MySQL host:
 
-- `database/pos_db.sql` is the concise reproducible setup.
-- `database/pos_db_export.sql` is the structure/data export without password hashes.
-- `.env` and generated avatar uploads are ignored by Git.
-- The clean TFA3 commit `0cc3377` is the restore point before TFA4 changes.
-- GitHub push and hosted deployment are not implied by local implementation; verify both separately before submission.
+1. Point the site document root to this repository's `public/` directory.
+2. Install production Composer dependencies with `composer install --no-dev --optimize-autoloader`.
+3. Provide a private production `.env` with `CI_ENVIRONMENT = production`, the real HTTPS `app.baseURL`, and host database credentials.
+4. Enable `app.forceGlobalSecureRequests = true` and secure cookies (`cookie.secure = true`, `cookie.httponly = true`, `cookie.samesite = Lax`) after HTTPS is active.
+5. Import `database/pos_db.sql` into a new database or back up an existing database before running `php spark migrate`.
+6. Initialize passwords privately with `php spark auth:set-password`; do not publish credentials.
+7. Grant the web process write permission to `writable/` and both upload directories.
+8. Confirm the host retains uploaded files between releases and includes them in backups.
+9. Verify URL rewriting from the included `public/.htaccess`, HTTPS, sessions, CSRF, database connectivity, uploads, logs, and error pages on the actual host.
+10. Keep development error pages and the debug toolbar disabled in production.
+
+## Troubleshooting
+
+- **Database connection error:** confirm MySQL is running and the `.env` host, port, database, user, and password are correct.
+- **Login always fails:** run the interactive `php spark auth:set-password username_here` command for an active account.
+- **Images fail to upload:** enable GD, check PHP `upload_max_filesize`/`post_max_size`, and make both upload directories writable. The application limit is 2 MB.
+- **Routes return 404:** point the document root to `public/`, enable rewrite support, and verify `app.baseURL`.
+- **CSRF error after a long-open form:** reload the form to obtain a fresh token.
+- **Migration error:** confirm the existing TFA customer/user tables are present and back up the database before retrying.
+
+## Repository and submission notes
+
+- `database/pos_db.sql` is the clean, reproducible database setup.
+- The archive columns are documented safety extensions and do not replace any official field.
+- Never commit `.env`, live password hashes, real credentials, generated uploads, database backups containing private data, or `writable/` runtime artifacts.
+- Git commit, push, and hosted deployment are separate owner-controlled steps; local testing does not imply any of them occurred.

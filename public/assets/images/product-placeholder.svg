@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="540" viewBox="0 0 720 540" role="img" aria-labelledby="title description">
+  <title id="title">Product image placeholder</title>
+  <desc id="description">Neutral package illustration for a product without an uploaded image.</desc>
+  <rect width="720" height="540" fill="#ecebe4"/>
+  <rect x="225" y="135" width="270" height="270" rx="24" fill="#dce5df" stroke="#276149" stroke-width="8"/>
+  <path d="M225 215h270M360 135v270" fill="none" stroke="#276149" stroke-width="8" opacity=".72"/>
+  <path d="M304 176h112" fill="none" stroke="#c7953f" stroke-linecap="round" stroke-width="12"/>
+</svg>

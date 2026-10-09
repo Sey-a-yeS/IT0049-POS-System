@@ -16,9 +16,9 @@ class Users extends BaseController
 
     public function index(): string
     {
-        $userModel = new UserModel();
-        $users     = $userModel
+        $users = (new UserModel())
             ->select('id, username, full_name, avatar, created_at')
+            ->where('is_archived', 0)
             ->orderBy('id', 'ASC')
             ->findAll();
 
@@ -28,7 +28,7 @@ class Users extends BaseController
         unset($user);
 
         return view('users/index', [
-            'title'      => 'User Accounts',
+            'title'      => 'Staff',
             'activePage' => 'users',
             'users'      => $users,
         ]);
@@ -37,7 +37,7 @@ class Users extends BaseController
     public function new(): string
     {
         return view('users/new', [
-            'title'      => 'New User',
+            'title'      => 'New Staff Member',
             'activePage' => 'users',
             'errors'     => session('errors') ?? [],
         ]);
@@ -45,39 +45,69 @@ class Users extends BaseController
 
     public function create(): RedirectResponse
     {
+        $avatar    = $this->request->getFile('avatar');
+        $hasAvatar = $avatar instanceof UploadedFile && $avatar->getError() !== UPLOAD_ERR_NO_FILE;
+        $response  = $this->rejectOversizedAvatar($avatar, $hasAvatar, 'users/new');
+
+        if ($response !== null) {
+            return $response;
+        }
+
         $validation = service('validation');
-        $validation->setRules($this->createRules());
+        $validation->setRules($this->createRules($hasAvatar));
 
         if (! $validation->withRequest($this->request)->run()) {
             return redirect()->to(site_url('users/new'))
-                ->withInput()
+                ->with('staffOld', $this->nonSensitiveInput())
                 ->with('errors', $validation->getErrors());
         }
 
-        $userModel = new UserModel();
-        $userModel->insert([
-            'username'   => trim((string) $this->request->getPost('username')),
-            'full_name'  => trim((string) $this->request->getPost('full_name')),
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
+        $filename = null;
+
+        if ($hasAvatar) {
+            try {
+                $filename = $this->prepareAvatar($avatar);
+            } catch (Throwable) {
+                return redirect()->to(site_url('users/new'))
+                    ->with('staffOld', $this->nonSensitiveInput())
+                    ->with('errors', ['avatar' => 'The avatar could not be prepared. Please try another JPG or PNG image.']);
+            }
+        }
+
+        try {
+            (new UserModel())->insert([
+                'username'    => trim((string) $this->request->getPost('username')),
+                'full_name'   => trim((string) $this->request->getPost('full_name')),
+                'password'    => password_hash((string) $this->request->getPost('password'), PASSWORD_DEFAULT),
+                'avatar'      => $filename,
+                'is_archived' => 0,
+                'created_at'  => date('Y-m-d H:i:s'),
+            ]);
+        } catch (Throwable $exception) {
+            if ($filename !== null) {
+                $this->removePreparedAvatar($filename);
+            }
+
+            throw $exception;
+        }
 
         return redirect()->to(site_url('users'))
-            ->with('success', 'User created successfully. Initialize its login password with the local auth:set-password command.');
+            ->with('success', 'Staff account created successfully.');
     }
 
     public function edit(int $id): string
     {
-        $userModel = new UserModel();
-        $user      = $userModel
+        $user = (new UserModel())
             ->select('id, username, full_name, avatar, created_at')
+            ->where('is_archived', 0)
             ->find($id);
 
         if ($user === null) {
-            throw PageNotFoundException::forPageNotFound('User not found.');
+            throw PageNotFoundException::forPageNotFound('Active staff account not found.');
         }
 
         return view('users/edit', [
-            'title'      => 'Edit User',
+            'title'      => 'Edit Staff Member',
             'activePage' => 'users',
             'user'       => $user,
             'avatarUrl'  => $this->avatarUrl($user['avatar'] ?? null),
@@ -90,39 +120,37 @@ class Users extends BaseController
         $userModel = new UserModel();
         $user      = $userModel
             ->select('id, username, full_name, avatar, created_at')
+            ->where('is_archived', 0)
             ->find($id);
 
         if ($user === null) {
-            throw PageNotFoundException::forPageNotFound('User not found.');
+            throw PageNotFoundException::forPageNotFound('Active staff account not found.');
         }
 
         $avatar    = $this->request->getFile('avatar');
         $hasAvatar = $avatar instanceof UploadedFile && $avatar->getError() !== UPLOAD_ERR_NO_FILE;
-        $rules     = $this->updateRules($hasAvatar);
+        $response  = $this->rejectOversizedAvatar($avatar, $hasAvatar, "users/{$id}/edit");
 
-        if ($hasAvatar && in_array($avatar->getError(), [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)) {
-            return redirect()->to(site_url("users/{$id}/edit"))
-                ->withInput()
-                ->with('errors', ['avatar' => 'The avatar must not exceed 2 MB.']);
+        if ($response !== null) {
+            return $response;
         }
 
+        $password   = (string) $this->request->getPost('password');
         $validation = service('validation');
-        $validation->setRules($rules);
+        $validation->setRules($this->updateRules($hasAvatar, $password !== ''));
 
         if (! $validation->withRequest($this->request)->run()) {
             return redirect()->to(site_url("users/{$id}/edit"))
-                ->withInput()
+                ->with('staffOld', $this->nonSensitiveInput())
                 ->with('errors', $validation->getErrors());
         }
 
-        $username = trim((string) $this->request->getPost('username'));
-        $duplicate = $userModel->where('username', $username)
-            ->where('id !=', $id)
-            ->first();
+        $username  = trim((string) $this->request->getPost('username'));
+        $duplicate = $userModel->where('username', $username)->where('id !=', $id)->first();
 
         if ($duplicate !== null) {
             return redirect()->to(site_url("users/{$id}/edit"))
-                ->withInput()
+                ->with('staffOld', $this->nonSensitiveInput())
                 ->with('errors', ['username' => 'That username is already in use.']);
         }
 
@@ -133,22 +161,26 @@ class Users extends BaseController
                 $newAvatar = $this->prepareAvatar($avatar);
             } catch (Throwable) {
                 return redirect()->to(site_url("users/{$id}/edit"))
-                    ->withInput()
+                    ->with('staffOld', $this->nonSensitiveInput())
                     ->with('errors', ['avatar' => 'The avatar could not be prepared. Please try another JPG or PNG image.']);
             }
         }
 
-        $updateData = [
+        $data = [
             'username'  => $username,
             'full_name' => trim((string) $this->request->getPost('full_name')),
         ];
 
+        if ($password !== '') {
+            $data['password'] = password_hash($password, PASSWORD_DEFAULT);
+        }
+
         if ($newAvatar !== null) {
-            $updateData['avatar'] = $newAvatar;
+            $data['avatar'] = $newAvatar;
         }
 
         try {
-            $userModel->update($id, $updateData);
+            $userModel->update($id, $data);
         } catch (Throwable $exception) {
             if ($newAvatar !== null) {
                 $this->removePreparedAvatar($newAvatar);
@@ -164,97 +196,138 @@ class Users extends BaseController
         }
 
         return redirect()->to(site_url('users'))
-            ->with('success', 'User updated successfully.');
+            ->with('success', 'Staff account updated successfully.');
     }
 
-    /**
-     * @return array<string, array<string, mixed>>
-     */
-    private function createRules(): array
+    public function archive(int $id): RedirectResponse
     {
-        return [
-            'username' => [
-                'label'  => 'Username',
-                'rules'  => 'required|max_length[50]|is_unique[users.username]',
-                'errors' => ['is_unique' => 'That username is already in use.'],
-            ],
-            'full_name' => [
-                'label' => 'Full name',
-                'rules' => 'required|max_length[100]',
-            ],
-        ];
+        if ((int) session('authUserId') === $id) {
+            return redirect()->to(site_url('users'))
+                ->with('error', 'You cannot archive the staff account currently signed in.');
+        }
+
+        $userModel = new UserModel();
+
+        if ($userModel->findActive($id) === null) {
+            throw PageNotFoundException::forPageNotFound('Active staff account not found.');
+        }
+
+        $userModel->update($id, ['is_archived' => 1]);
+
+        return redirect()->to(site_url('users'))
+            ->with('success', 'Staff account archived without changing historical sales.');
     }
 
-    /**
-     * @return array<string, array<string, mixed>>
-     */
-    private function updateRules(bool $hasAvatar): array
+    /** @return array<string, array<string, mixed>> */
+    private function createRules(bool $hasAvatar): array
     {
-        $rules = [
-            'username' => [
-                'label' => 'Username',
-                'rules' => 'required|max_length[50]',
-            ],
-            'full_name' => [
-                'label' => 'Full name',
-                'rules' => 'required|max_length[100]',
-            ],
-        ];
+        $rules = $this->identityRules();
+        $rules['username']['rules'] .= '|is_unique[users.username]';
+        $rules['username']['errors'] = ['is_unique' => 'That username is already in use.'];
+        $rules += $this->passwordRules();
 
         if ($hasAvatar) {
-            $rules['avatar'] = [
-                'label' => 'Avatar',
-                'rules' => 'uploaded[avatar]|max_size[avatar,2048]|is_image[avatar]|mime_in[avatar,image/jpeg,image/png]|ext_in[avatar,jpg,jpeg,png]',
-                'errors' => [
-                    'uploaded' => 'Please choose a valid image to upload.',
-                    'max_size'  => 'The avatar must not exceed 2 MB.',
-                    'is_image'  => 'The selected file must be a valid image.',
-                    'mime_in'   => 'Only JPG and PNG images are allowed.',
-                    'ext_in'    => 'Only JPG and PNG images are allowed.',
-                ],
-            ];
+            $rules['avatar'] = $this->avatarRule();
         }
 
         return $rules;
     }
 
+    /** @return array<string, array<string, mixed>> */
+    private function updateRules(bool $hasAvatar, bool $hasPassword): array
+    {
+        $rules = $this->identityRules();
+
+        if ($hasPassword) {
+            $rules += $this->passwordRules();
+        }
+
+        if ($hasAvatar) {
+            $rules['avatar'] = $this->avatarRule();
+        }
+
+        return $rules;
+    }
+
+    /** @return array<string, array<string, mixed>> */
+    private function identityRules(): array
+    {
+        return [
+            'username' => ['label' => 'Username', 'rules' => 'required|max_length[50]'],
+            'full_name' => ['label' => 'Full name', 'rules' => 'required|max_length[100]'],
+        ];
+    }
+
+    /** @return array<string, array<string, mixed>> */
+    private function passwordRules(): array
+    {
+        return [
+            'password' => [
+                'label' => 'Password',
+                'rules' => 'required|min_length[12]|max_length[255]|matches[password_confirm]',
+            ],
+            'password_confirm' => [
+                'label' => 'Password confirmation',
+                'rules' => 'required|max_length[255]',
+            ],
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function avatarRule(): array
+    {
+        return [
+            'label' => 'Avatar',
+            'rules' => 'uploaded[avatar]|max_size[avatar,2048]|is_image[avatar]|mime_in[avatar,image/jpeg,image/png]|ext_in[avatar,jpg,jpeg,png]',
+            'errors' => [
+                'uploaded' => 'Please choose a valid image to upload.',
+                'max_size'  => 'The avatar must not exceed 2 MB.',
+                'is_image'  => 'The selected file must be a genuine image.',
+                'mime_in'   => 'Only JPG and PNG images are allowed.',
+                'ext_in'    => 'Only JPG and PNG images are allowed.',
+            ],
+        ];
+    }
+
+    private function rejectOversizedAvatar(?UploadedFile $avatar, bool $hasAvatar, string $returnPath): ?RedirectResponse
+    {
+        if ($hasAvatar && $avatar !== null && in_array($avatar->getError(), [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)) {
+            return redirect()->to(site_url($returnPath))
+                ->with('staffOld', $this->nonSensitiveInput())
+                ->with('errors', ['avatar' => 'The avatar must not exceed 2 MB.']);
+        }
+
+        return null;
+    }
+
     private function prepareAvatar(UploadedFile $avatar): string
     {
-        $uploadDirectory = FCPATH . self::AVATAR_DIRECTORY;
+        $directory = FCPATH . self::AVATAR_DIRECTORY;
 
-        if (! is_dir($uploadDirectory) && ! mkdir($uploadDirectory, 0755, true) && ! is_dir($uploadDirectory)) {
+        if (! is_dir($directory) && ! mkdir($directory, 0755, true) && ! is_dir($directory)) {
             throw new RuntimeException('Unable to create the avatar upload directory.');
         }
 
-        $imageSize = getimagesize($avatar->getTempName());
+        $size = getimagesize($avatar->getTempName());
 
-        if ($imageSize === false) {
+        if ($size === false || $size[0] < 1 || $size[1] < 1) {
             throw new RuntimeException('Unable to read the uploaded image.');
         }
 
-        $thumbnailSize = min(256, $imageSize[0], $imageSize[1]);
-
-        if ($thumbnailSize < 1) {
-            throw new RuntimeException('The uploaded image has invalid dimensions.');
-        }
-
-        $filename        = $avatar->getRandomName();
-        $destinationPath = $uploadDirectory . DIRECTORY_SEPARATOR . $filename;
+        $filename = $avatar->getRandomName();
+        $path     = $directory . DIRECTORY_SEPARATOR . $filename;
 
         try {
-            service('image', 'gd')
-                ->withFile($avatar->getTempName())
-                ->fit($thumbnailSize, $thumbnailSize, 'center')
-                ->save($destinationPath, 85);
+            service('image', 'gd')->withFile($avatar->getTempName())->fit(256, 256, 'center')->save($path, 85);
         } catch (Throwable $exception) {
-            if (is_file($destinationPath)) {
-                unlink($destinationPath);
+            if (is_file($path)) {
+                unlink($path);
             }
 
             throw $exception;
         }
 
-        if (! is_file($destinationPath)) {
+        if (! is_file($path)) {
             throw new RuntimeException('The prepared avatar was not created.');
         }
 
@@ -285,5 +358,14 @@ class Users extends BaseController
         if (is_file($path)) {
             unlink($path);
         }
+    }
+
+    /** @return array{username: string, full_name: string} */
+    private function nonSensitiveInput(): array
+    {
+        return [
+            'username'  => trim((string) $this->request->getPost('username')),
+            'full_name' => trim((string) $this->request->getPost('full_name')),
+        ];
     }
 }

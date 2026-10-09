@@ -1,6 +1,8 @@
 <?php
-$username = old('username', $user['username'] ?? '');
-$fullName = old('full_name', $user['full_name'] ?? '');
+$staffOld = session('staffOld') ?? [];
+$username = $staffOld['username'] ?? ($user['username'] ?? '');
+$fullName = $staffOld['full_name'] ?? ($user['full_name'] ?? '');
+$isEdit   = isset($user['id']);
 ?>
 
 <?php if ($errors !== []): ?>
@@ -35,12 +37,27 @@ $fullName = old('full_name', $user['full_name'] ?? '');
         <?php endif; ?>
     </div>
 
+    <div class="form-grid-two">
+        <div class="form-field<?= isset($errors['password']) ? ' has-error' : '' ?>">
+            <label for="password"><?= $isEdit ? 'New password' : 'Password' ?><?= $isEdit ? '' : ' <span aria-hidden="true">*</span>' ?></label>
+            <input id="password" name="password" type="password" maxlength="255" value="" autocomplete="new-password">
+            <small><?= $isEdit ? 'Optional. Leave blank to keep the current password.' : 'At least 12 characters.' ?></small>
+            <?php if (isset($errors['password'])): ?><span class="field-error"><?= esc($errors['password']) ?></span><?php endif; ?>
+        </div>
+        <div class="form-field<?= isset($errors['password_confirm']) ? ' has-error' : '' ?>">
+            <label for="password_confirm">Confirm password<?= $isEdit ? '' : ' <span aria-hidden="true">*</span>' ?></label>
+            <input id="password_confirm" name="password_confirm" type="password" maxlength="255" value="" autocomplete="new-password">
+            <small>Re-enter the new password exactly.</small>
+            <?php if (isset($errors['password_confirm'])): ?><span class="field-error"><?= esc($errors['password_confirm']) ?></span><?php endif; ?>
+        </div>
+    </div>
+
     <?php if ($allowAvatar): ?>
         <div class="form-field avatar-field<?= isset($errors['avatar']) ? ' has-error' : '' ?>">
             <label for="avatar">Profile picture</label>
             <div class="current-avatar">
-                <img src="<?= esc($avatarUrl, 'attr') ?>" alt="Current avatar for <?= esc($user['full_name'], 'attr') ?>">
-                <span>The current image remains when no replacement is selected.</span>
+                <img src="<?= esc($avatarUrl, 'attr') ?>" alt="Current avatar for <?= esc($fullName !== '' ? $fullName : 'new staff member', 'attr') ?>">
+                <span><?= $isEdit ? 'The current image remains when no replacement is selected.' : 'Optional staff avatar preview.' ?></span>
             </div>
             <input id="avatar" name="avatar" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" aria-describedby="avatar_help<?= isset($errors['avatar']) ? ' avatar_error' : '' ?>">
             <small id="avatar_help">Optional JPG or PNG only. Maximum size: 2 MB.</small>

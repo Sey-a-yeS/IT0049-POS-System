@@ -55,7 +55,7 @@
                                     <td><a href="mailto:<?= esc($customer['email'], 'attr') ?>"><?= esc($customer['email']) ?></a></td>
                                     <td><a class="quiet-link" href="tel:<?= esc($customer['phone'], 'attr') ?>"><?= esc($customer['phone']) ?></a></td>
                                     <td><time datetime="<?= esc($customer['created_at'], 'attr') ?>"><?= esc(date('M j, Y · g:i A', strtotime($customer['created_at']))) ?></time></td>
-                                    <td><a class="action-link" href="<?= site_url('customers/' . $customer['id'] . '/edit') ?>">Edit</a></td>
+                                    <td><div class="row-actions"><a class="action-link" href="<?= site_url('customers/' . $customer['id'] . '/edit') ?>">Edit</a><form action="<?= site_url('customers/' . $customer['id'] . '/archive') ?>" method="post"><?= csrf_field() ?><button class="action-link action-link-danger" type="submit" data-confirm="Archive this customer? Historical sales will remain unchanged.">Archive</button></form></div></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>

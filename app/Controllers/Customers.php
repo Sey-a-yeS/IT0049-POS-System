@@ -15,7 +15,7 @@ class Customers extends BaseController
         $data = [
             'title'      => 'Customer Accounts',
             'activePage' => 'customers',
-            'customers'  => $customerModel->orderBy('id', 'ASC')->findAll(),
+            'customers'  => $customerModel->findAllActive(),
         ];
 
         return view('customers/index', $data);
@@ -51,7 +51,7 @@ class Customers extends BaseController
     public function edit(int $id): string
     {
         $customerModel = new CustomerModel();
-        $customer      = $customerModel->find($id);
+        $customer      = $customerModel->findActive($id);
 
         if ($customer === null) {
             throw PageNotFoundException::forPageNotFound('Customer not found.');
@@ -69,7 +69,7 @@ class Customers extends BaseController
     {
         $customerModel = new CustomerModel();
 
-        if ($customerModel->find($id) === null) {
+        if ($customerModel->findActive($id) === null) {
             throw PageNotFoundException::forPageNotFound('Customer not found.');
         }
 
@@ -86,6 +86,20 @@ class Customers extends BaseController
 
         return redirect()->to(site_url('customers'))
             ->with('success', 'Customer updated successfully.');
+    }
+
+    public function archive(int $id): RedirectResponse
+    {
+        $customerModel = new CustomerModel();
+
+        if ($customerModel->findActive($id) === null) {
+            throw PageNotFoundException::forPageNotFound('Active customer not found.');
+        }
+
+        $customerModel->update($id, ['is_archived' => 1]);
+
+        return redirect()->to(site_url('customers'))
+            ->with('success', 'Customer archived without changing historical sales.');
     }
 
     /**
@@ -120,10 +134,13 @@ class Customers extends BaseController
             'full_name' => trim((string) $this->request->getPost('full_name')),
             'email'     => trim((string) $this->request->getPost('email')),
             'phone'     => $phone === '' ? null : $phone,
+            'is_archived' => 0,
         ];
 
         if ($includeCreatedAt) {
             $data['created_at'] = date('Y-m-d H:i:s');
+        } else {
+            unset($data['is_archived']);
         }
 
         return $data;

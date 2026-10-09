@@ -1,76 +1,57 @@
 <?= view('templates/header') ?>
 
 <div class="content-wrap">
-    <section class="page-intro home-intro">
+    <section class="page-intro dashboard-intro">
         <div>
-            <span class="eyebrow">Overview</span>
-            <h1>Point-of-sale workspace</h1>
-            <p>Browse customer contact information and staff account details from one focused management interface.</p>
+            <span class="eyebrow">Retail operations</span>
+            <h1>Point-of-sale dashboard</h1>
+            <p>Monitor inventory and recent transactions, then move directly into the day’s core management workflows.</p>
         </div>
         <div class="intro-actions">
-            <?php if (session('isLoggedIn') === true): ?>
-                <a class="button button-primary" href="<?= site_url('customers') ?>">View customers</a>
-                <a class="button button-secondary" href="<?= site_url('users') ?>">View staff users</a>
-            <?php else: ?>
-                <a class="button button-primary" href="<?= site_url('login') ?>">Staff login</a>
-            <?php endif; ?>
+            <a class="button button-primary" href="<?= site_url('sales/new') ?>">Record Sale</a>
+            <a class="button button-secondary" href="<?= site_url('products/new') ?>">New Product</a>
         </div>
     </section>
 
-    <section class="workspace-overview" aria-labelledby="system-overview-title">
-        <div class="overview-copy">
-            <span class="section-kicker">System overview</span>
-            <h2 id="system-overview-title">A focused directory for essential POS accounts.</h2>
-            <p>The application demonstrates a clean CodeIgniter MVC workflow with database-backed account listings, validated forms, profile-image preparation, and session-based access control.</p>
-        </div>
-        <dl class="system-facts">
-            <div><dt>Framework</dt><dd>CodeIgniter 4</dd></div>
-            <div><dt>Data source</dt><dd>MySQL database</dd></div>
-            <div><dt>Access</dt><dd>Authenticated staff</dd></div>
-        </dl>
+    <section class="metric-grid" aria-label="POS summary">
+        <a class="metric-card" href="<?= site_url('products') ?>"><span>Active products</span><strong><?= esc($metrics['products']) ?></strong></a>
+        <a class="metric-card" href="<?= site_url('customers') ?>"><span>Customers</span><strong><?= esc($metrics['customers']) ?></strong></a>
+        <a class="metric-card" href="<?= site_url('users') ?>"><span>Active staff</span><strong><?= esc($metrics['staff']) ?></strong></a>
+        <a class="metric-card" href="<?= site_url('sales') ?>"><span>Recorded sales</span><strong><?= esc($metrics['sales']) ?></strong></a>
+        <a class="metric-card metric-card-alert" href="<?= site_url('products') ?>"><span>Low stock</span><strong><?= esc($metrics['low_stock']) ?></strong></a>
     </section>
 
-    <?php if (session('isLoggedIn') === true): ?>
-        <section class="directory-section" aria-labelledby="directory-title">
-            <div class="section-heading">
-                <div>
-                    <span class="section-kicker">Quick access</span>
-                    <h2 id="directory-title">Account directories</h2>
-                </div>
-                <p>Open a database-backed directory to review its current records.</p>
+    <section class="table-panel" aria-labelledby="recent-sales-title">
+        <div class="table-toolbar">
+            <div>
+                <span class="section-kicker">Latest activity</span>
+                <h2 id="recent-sales-title">Recent sales</h2>
             </div>
-
-            <div class="directory-grid">
-                <a class="directory-link" href="<?= site_url('customers') ?>">
-                    <span class="directory-index" aria-hidden="true">01</span>
-                    <span class="directory-copy">
-                        <strong>Customer Accounts</strong>
-                        <span>Review, create, and edit customer contact information.</span>
-                    </span>
-                    <span class="directory-arrow" aria-hidden="true">&rarr;</span>
-                </a>
-
-                <a class="directory-link" href="<?= site_url('users') ?>">
-                    <span class="directory-index" aria-hidden="true">02</span>
-                    <span class="directory-copy">
-                        <strong>User Accounts</strong>
-                        <span>Review, create, edit, and manage staff profile pictures.</span>
-                    </span>
-                    <span class="directory-arrow" aria-hidden="true">&rarr;</span>
-                </a>
-            </div>
-        </section>
-    <?php else: ?>
-        <section class="directory-section" aria-labelledby="security-title">
-            <div class="section-heading">
-                <div>
-                    <span class="section-kicker">Protected workspace</span>
-                    <h2 id="security-title">Account management requires a staff session.</h2>
-                </div>
-                <p>Sign in with an initialized staff account to manage customer and user records.</p>
-            </div>
-        </section>
-    <?php endif; ?>
+            <a class="button button-secondary" href="<?= site_url('sales') ?>">View history</a>
+        </div>
+        <div class="table-scroll" tabindex="0">
+            <table>
+                <caption class="sr-only">Five most recent sales</caption>
+                <thead><tr><th scope="col">Sale</th><th scope="col">Product</th><th scope="col">Customer</th><th scope="col">Staff</th><th scope="col">Qty</th><th scope="col">Total</th></tr></thead>
+                <tbody>
+                    <?php if ($recentSales === []): ?>
+                        <tr><td class="empty-state" colspan="6">No sales have been recorded yet.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($recentSales as $sale): ?>
+                            <tr>
+                                <td><span class="row-id">#<?= esc($sale['id']) ?></span></td>
+                                <td><strong><?= esc($sale['product_name']) ?></strong></td>
+                                <td><?= esc($sale['customer_name'] ?? 'Walk-in customer') ?></td>
+                                <td><?= esc($sale['staff_name']) ?></td>
+                                <td><?= esc($sale['quantity']) ?></td>
+                                <td><strong>₱<?= esc(number_format((float) $sale['total_price'], 2)) ?></strong></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </section>
 </div>
 
 <?= view('templates/footer') ?>

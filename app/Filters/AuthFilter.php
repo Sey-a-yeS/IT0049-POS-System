@@ -2,6 +2,7 @@
 
 namespace App\Filters;
 
+use App\Models\UserModel;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -13,13 +14,23 @@ class AuthFilter implements FilterInterface
         $session = service('session');
 
         if ($session->get('isLoggedIn') === true && is_numeric($session->get('authUserId'))) {
-            return null;
+            $user = (new UserModel())
+                ->select('id')
+                ->where('id', (int) $session->get('authUserId'))
+                ->where('is_archived', 0)
+                ->first();
+
+            if ($user !== null) {
+                return null;
+            }
+
+            $session->destroy();
         }
 
         if (strtolower($request->getMethod()) === 'get') {
             $path = '/' . ltrim($request->getUri()->getPath(), '/');
 
-            if (preg_match('#^/(customers|users)(?:/|$)#', $path) === 1) {
+            if (preg_match('#^/(?:$|products(?:/|$)|customers(?:/|$)|users(?:/|$)|sales(?:/|$))#', $path) === 1) {
                 $session->set('intendedPath', $path);
             }
         }

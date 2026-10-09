@@ -16,7 +16,7 @@ class Auth extends BaseController
         $session = service('session');
 
         if ($session->get('isLoggedIn') === true) {
-            return redirect()->to(site_url('customers'));
+            return redirect()->to(site_url('/'));
         }
 
         $body = view('auth/login', [
@@ -69,6 +69,7 @@ class Auth extends BaseController
         $user      = $userModel
             ->select('id, username, password')
             ->where('username', $username)
+            ->where('is_archived', 0)
             ->first();
 
         $password   = (string) $this->request->getPost('password');
@@ -97,8 +98,8 @@ class Auth extends BaseController
             'isLoggedIn'   => true,
         ]);
 
-        if (! is_string($intendedPath) || preg_match('#^/(customers|users)(?:/|$)#', $intendedPath) !== 1) {
-            $intendedPath = '/customers';
+        if (! is_string($intendedPath) || preg_match('#^/(?:$|products(?:/|$)|customers(?:/|$)|users(?:/|$)|sales(?:/|$))#', $intendedPath) !== 1) {
+            $intendedPath = '/';
         }
 
         return redirect()->to(site_url(ltrim($intendedPath, '/')));
