@@ -1,212 +1,149 @@
-# CodeIgniter 4 POS System
+# IT0049 — Web System Technologies Assessments
 
-## IT0049 Technical Formative Assessment 4
+This repository collects the completed IT0049 Technical Formative Assessments, Technical Summative Assessments, and previous Midterm POS project in one navigable default-branch layout.
 
-This Point-of-Sale application was developed for **IT0049 - Web System Technologies** and extended for **Technical Formative Assessment 4: Who's Allowed In? Sessions and Authentication**.
+Each directory is a **standalone CodeIgniter 4 application**. Applications have separate Composer dependencies, routes, controllers, models, views, database setup, environment configuration, and runtime storage. Run installation commands from inside the application you want to inspect; do not combine their databases or copy their source files into one another.
 
-TFA4 preserves the TFA3 customer and staff-account workflows while requiring an authenticated staff session for every customer and user management page. The public Home, About, and Login pages remain available without authentication.
+No application in this repository is claimed to be publicly deployed. The source and setup instructions are provided for local review.
 
-## Features
+## Repository overview
 
-- Database-backed Customer Accounts and User Accounts
-- Validated customer and user create/edit workflows from TFA3
-- Optional JPG/PNG avatar upload with a 2 MB limit and a local placeholder
-- Password hashes stored in `users.password` using PHP `password_hash()`
-- Login verification using PHP `password_verify()`
-- Session ID regeneration after a successful login
-- CodeIgniter `AuthFilter` protection on all customer/user GET and POST routes
-- POST-only, CSRF-protected logout that destroys the authenticated session
-- CSRF protection on every form and escaped output in views
-- Short session-based delay after repeated unsuccessful login attempts
-- No-store response headers on protected account-management pages
+| Directory | Assessment | Description | Preserved source branch |
+|---|---|---|---|
+| [`pos-system/`](pos-system/) | TFA1–TFA4 | Point-of-sale account-management application culminating in authenticated customer and staff workflows | [`main` snapshot at `6a61396`](https://github.com/Sey-a-yeS/IT0049-TFA1-POS-System/tree/6a61396f20b6e9e0987fddd8dca2bb874792c757) |
+| [`tasks-for-today/`](tasks-for-today/) | TSA1–TSA2 | Task management application with public task views and authenticated create, edit, and archive workflows | [`tsa2-tasks-for-today` at `390d4a0`](https://github.com/Sey-a-yeS/IT0049-TFA1-POS-System/tree/390d4a0172de3ad14fb7b87b8b20a5a6145521e0) |
+| [`previous-midterm-pos/`](previous-midterm-pos/) | Previous Midterm Project | Complete POS implementation with products, customers, staff, authentication, transactional sales, inventory control, and sales history | [`midterm-pos-acceptance` at `931e2ce`](https://github.com/Sey-a-yeS/IT0049-TFA1-POS-System/tree/931e2cee9126dc974881b454fe74efb277a7cd20) |
 
-Passwords are not created or edited in the ordinary User Accounts forms. A local CLI command initializes credentials deliberately without echoing password input.
+The three original branch histories remain available. The organized directory layout is prepared separately so the assessments can eventually be reviewed directly from the default `main` branch after approval and publication.
 
-## Requirements
-
-- PHP 8.2 or newer
-- Composer
-- MySQL or MariaDB
-- PHP extensions required by CodeIgniter 4, including `intl`, `mbstring`, `mysqli`, and `gd`
-- Write access to `writable/` and `public/uploads/avatars/`
-
-## Local installation
-
-1. Enter the project directory:
-
-   ```bash
-   cd pos-system
-   ```
-
-2. Install PHP dependencies:
-
-   ```bash
-   composer install
-   ```
-
-3. Create the local environment file:
-
-   ```bash
-   cp env .env
-   ```
-
-4. Configure the application URL and your own local MySQL connection in `.env`:
-
-   ```ini
-   CI_ENVIRONMENT = development
-   app.baseURL = 'http://localhost:8080/'
-   app.indexPage = ''
-
-   database.default.hostname = 127.0.0.1
-   database.default.database = pos_db
-   database.default.username = your_mysql_user
-   database.default.password = your_mysql_password
-   database.default.DBDriver = MySQLi
-   database.default.DBPrefix =
-   database.default.port = 3306
-   ```
-
-   `.env` is ignored by Git. Never commit it or copy private credentials into tracked documentation.
-
-5. Import the reproducible database setup:
-
-   ```bash
-   mysql --host=127.0.0.1 --port=3306 -u your_mysql_user -p < database/pos_db.sql
-   ```
-
-   The setup contains the TFA3 customer/user data, the existing `avatar` column, and the TFA4 nullable `password VARCHAR(255)` column. Tracked SQL files intentionally contain `NULL` password values so no usable password hashes or credentials are published.
-
-   For an existing TFA3 database instead of a fresh import, apply the migration:
-
-   ```bash
-   php spark migrate
-   ```
-
-6. Initialize every existing staff password locally:
-
-   ```bash
-   php spark auth:set-password --all
-   ```
-
-   The command prompts separately for each existing username, requires at least 12 characters, hides terminal input, confirms each password, and stores only `password_hash()` output. It does not print or retain plaintext passwords. To initialize or change one user later, run:
-
-   ```bash
-   php spark auth:set-password username_here
-   ```
-
-   A newly created User Account cannot sign in until this local command has initialized its password. This avoids a shared or hard-coded default credential.
-
-7. Ensure the avatar upload directory is writable:
-
-   ```bash
-   chmod 755 public/uploads/avatars
-   ```
-
-8. Start the local development server:
-
-   ```bash
-   php spark serve
-   ```
-
-9. Open [http://localhost:8080/](http://localhost:8080/) and use `/login` for staff access.
-
-## Routes and access rules
-
-| Method | URL | Access | Purpose |
-| --- | --- | --- | --- |
-| GET | `/` | Public | Home |
-| GET | `/about` | Public | About |
-| GET | `/login` | Public | Login form |
-| POST | `/login` | Public + CSRF | Validate credentials and create session |
-| POST | `/logout` | Authenticated + CSRF | Destroy session and return to Login |
-| GET | `/customers` | Authenticated | Customer Accounts |
-| GET | `/customers/new` | Authenticated | New Customer form |
-| POST | `/customers` | Authenticated + CSRF | Create customer |
-| GET | `/customers/{id}/edit` | Authenticated | Edit Customer form |
-| POST | `/customers/{id}` | Authenticated + CSRF | Update customer |
-| GET | `/users` | Authenticated | User Accounts |
-| GET | `/users/new` | Authenticated | New User form |
-| POST | `/users` | Authenticated + CSRF | Create user |
-| GET | `/users/{id}/edit` | Authenticated | Edit User/avatar form |
-| POST | `/users/{id}` | Authenticated + CSRF | Update user/avatar |
-
-Unauthenticated protected GET requests remember the requested customer/user path and redirect to `/login`. After successful authentication, the application returns to that safe internal path. Unauthenticated writes are stopped by the Filter and are never executed.
-
-## Authentication workflow
-
-1. `Auth::authenticate()` validates non-empty username/password input.
-2. `UserModel` retrieves only the fields needed for authentication.
-3. `password_verify()` compares the submitted password with the stored hash.
-4. Invalid usernames and passwords receive the same general error message.
-5. Successful login regenerates the session ID and stores only the user ID, username, and login-state flag.
-6. `AuthFilter` checks that login state before the protected controller runs.
-7. Logout is a POST request with a CSRF token; it removes authentication state, destroys the session, and redirects to `/login`.
-
-The login form never repopulates the password. Customer/User listings and edit controllers explicitly exclude the password column, and no view displays a hash.
-
-## Existing TFA3 workflows
-
-- New Customer validates full name and email and preserves non-sensitive old input after failure.
-- Edit Customer updates the selected database record through `CustomerModel`.
-- New User validates required fields and unique usernames; it does not ask for an authentication password.
-- Edit User preserves an unchanged username and supports an optional avatar replacement.
-- Avatar files use random filenames, image validation, centered square preparation, and the local placeholder fallback.
-
-## Database and source structure
+## Directory navigation
 
 ```text
-app/
-|-- Commands/SetUserPassword.php
-|-- Config/
-|   |-- Filters.php
-|   `-- Routes.php
-|-- Controllers/
-|   |-- Auth.php
-|   |-- Customers.php
-|   |-- Pages.php
-|   `-- Users.php
-|-- Database/Migrations/2026-10-08-143500_AddPasswordToUsers.php
-|-- Filters/AuthFilter.php
-|-- Models/
-|   |-- CustomerModel.php
-|   `-- UserModel.php
-`-- Views/
-    |-- auth/login.php
-    |-- customers/
-    |-- users/
-    `-- templates/
-database/
-|-- pos_db.sql
-`-- pos_db_export.sql
-public/
-|-- assets/
-`-- uploads/avatars/
+IT0049-TFA1-POS-System/
+├── README.md
+├── pos-system/             # Technical Formative Assessments 1–4
+├── tasks-for-today/        # Technical Summative Assessments 1–2
+└── previous-midterm-pos/   # Previous Midterm POS application
 ```
 
-Controllers coordinate validation and workflows, Models perform database access, the Filter enforces route access, and Views render supplied data without SQL.
+Every application directory contains its own `spark`, `composer.json`, `composer.lock`, `app/`, `public/`, `tests/`, `writable/`, database resources, and detailed README.
 
-## Deployment requirements
+## Technical Formative Assessments
 
-The assessment requires a hosted working application; `localhost:8080` is only local verification. Deployment is a separate manual step and must not be performed without the owner's authorization.
+### TFA1–TFA4 Point-of-Sale system
 
-For hosting:
+Open [`pos-system/`](pos-system/) for the TFA application progression. The preserved final TFA4 snapshot includes:
 
-- Point the web document root to `public/`, not the repository root.
-- Use a production MySQL database and private environment variables.
-- Set `CI_ENVIRONMENT = production`.
-- Set the real HTTPS `app.baseURL` and enable `app.forceGlobalSecureRequests = true`.
-- Enable secure session/CSRF cookies with `cookie.secure = true`; retain `cookie.httponly = true` and `cookie.samesite = Lax`.
-- Keep `.env`, database credentials, password hashes, and demo plaintext credentials out of Git.
-- Make `writable/` and `public/uploads/avatars/` writable by the web process.
-- Run `php spark migrate` and initialize hosted demo credentials privately with `php spark auth:set-password`.
-- Disable development debug output and confirm login/logout over HTTPS.
+- database-backed customer and staff-account management;
+- validated create and edit workflows;
+- staff avatar upload handling;
+- password hashing and session authentication;
+- protected customer/staff routes and CSRF-protected forms.
 
-Do not publish demo credentials in this README or in a public SQL export.
+Detailed setup and route documentation: [`pos-system/README.md`](pos-system/README.md)
 
-## Repository notes
+Assessment references:
 
-- `database/pos_db.sql` is the concise reproducible setup.
-- `database/pos_db_export.sql` is the structure/data export without password hashes.
-- `.env` and generated avatar uploads are ignored by Git.
-- The clean TFA3 commit `0cc3377` is the restore point before TFA4 changes.
-- GitHub push and hosted deployment are not implied by local implementation; verify both separately before submission.
+- [`pos-system/documentation/IT0049 - TFA2 - VICENCIO.pdf`](pos-system/documentation/IT0049%20-%20TFA2%20-%20VICENCIO.pdf)
+- [`pos-system/documentation/IT0049 - TFA3 - VICENCIO.pdf`](pos-system/documentation/IT0049%20-%20TFA3%20-%20VICENCIO.pdf)
+
+Database resources:
+
+- [`pos-system/database/pos_db.sql`](pos-system/database/pos_db.sql)
+- [`pos-system/database/pos_db_export.sql`](pos-system/database/pos_db_export.sql)
+
+## Technical Summative Assessments
+
+### TSA1–TSA2 Tasks for Today
+
+Open [`tasks-for-today/`](tasks-for-today/) for the summative assessment application. The preserved TSA2 snapshot includes:
+
+- public Today, All Tasks, Profile, and About pages;
+- session-based login and logout;
+- authenticated task creation and editing;
+- soft archival instead of physical deletion;
+- server-side validation, CSRF protection, and escaped output.
+
+Detailed setup and route documentation: [`tasks-for-today/README.md`](tasks-for-today/README.md)
+
+Assessment reference:
+
+- [`tasks-for-today/documentation/TSA1 - VICENCIO.pdf`](tasks-for-today/documentation/TSA1%20-%20VICENCIO.pdf)
+
+Database resource:
+
+- [`tasks-for-today/database/tasks_today_db.sql`](tasks-for-today/database/tasks_today_db.sql)
+
+## Previous Midterm Project
+
+Open [`previous-midterm-pos/`](previous-midterm-pos/) for the earlier Midterm POS implementation. It extends the formative POS work with:
+
+- product, customer, and staff management;
+- staff authentication and protected management routes;
+- product images and staff avatars;
+- transactional stock-controlled sales;
+- relational sales history that retains archived record names.
+
+Detailed setup, schema, routes, and security notes: [`previous-midterm-pos/README.md`](previous-midterm-pos/README.md)
+
+Database resource:
+
+- [`previous-midterm-pos/database/pos_db.sql`](previous-midterm-pos/database/pos_db.sql)
+
+## General local setup
+
+The exact setup for each project is documented in that project's README. The common workflow is:
+
+1. Enter exactly one application directory.
+2. Install that application's locked Composer dependencies.
+3. Copy its tracked `env` template to the ignored `.env` file.
+4. Configure a dedicated local database and application URL.
+5. Import the database SQL file or follow the application's migration instructions.
+6. Initialize any required login password through the documented CLI command.
+7. Start the CodeIgniter development server.
+
+Example:
+
+```bash
+cd pos-system
+composer install
+cp env .env
+# Configure .env and import the database described in pos-system/README.md
+php spark serve
+```
+
+Run only one application on port 8080 at a time, or assign different ports and matching `app.baseURL` values. Each application should use its own database.
+
+## Application-specific setup references
+
+| Application | Database setup | Credential initialization |
+|---|---|---|
+| TFA1–TFA4 POS | Import `pos-system/database/pos_db.sql` or follow its migration guidance | `php spark auth:set-password username_here` from `pos-system/` |
+| TSA1–TSA2 Tasks | Import `tasks-for-today/database/tasks_today_db.sql` or follow its migration guidance | `php spark auth:set-password isaiahvicencio` from `tasks-for-today/` |
+| Previous Midterm POS | Import `previous-midterm-pos/database/pos_db.sql` or follow its migration guidance | `php spark auth:set-password username_here` from `previous-midterm-pos/` |
+
+Passwords are deliberately not included. Each command prompts privately and stores only a password hash.
+
+## Branch preservation
+
+The original assessment branches remain the authoritative historical snapshots:
+
+| Branch | Preserved commit | Purpose |
+|---|---:|---|
+| `main` | `6a61396` | TFA1–TFA4 progression before repository organization |
+| `tsa2-tasks-for-today` | `390d4a0` | TSA1–TSA2 application |
+| `midterm-pos-acceptance` | `931e2ce` | Previous Midterm POS application |
+
+The integration work does not rewrite or delete these histories. A separate backup branch also records the original `main` commit before organization.
+
+## Security and repository hygiene
+
+- Real `.env` files, credentials, sessions, logs, caches, Composer `vendor/` directories, and generated uploads are excluded from version control.
+- Tracked `env` files are configuration templates and do not contain working application passwords.
+- Database setup files intentionally avoid publishing usable login credentials.
+- Install dependencies independently inside each application.
+- Never point a web server at the repository root; when running one application, its document root should be that application's `public/` directory.
+
+## Repository status
+
+This organized layout is intended for review from the default branch after its integration commit has been inspected and explicitly approved for publication. The original project branches remain available for commit-by-commit history and comparison.
