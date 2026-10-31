@@ -2,7 +2,7 @@
 
 This repository collects the completed IT0049 Technical Formative Assessments, Technical Summative Assessments, and previous Midterm POS project in one navigable default-branch layout.
 
-Each directory is a standalone application. The earlier assessments use CodeIgniter 4; TFA5 uses Laravel. Install dependencies from inside the application you want to run.
+Each directory is a standalone application. The earlier assessments use CodeIgniter 4; TFA5 and TFA6 use the same Laravel application. Install dependencies from inside the application you want to run.
 
 No application in this repository is claimed to be publicly deployed. The source and setup instructions are provided for local review.
 
@@ -13,7 +13,7 @@ No application in this repository is claimed to be publicly deployed. The source
 | [`pos-system/`](pos-system/) | TFA1–TFA4 | Point-of-sale account-management application culminating in authenticated customer and staff workflows | [`main` snapshot at `6a61396`](https://github.com/Sey-a-yeS/IT0049-TFA1-POS-System/tree/6a61396f20b6e9e0987fddd8dca2bb874792c757) |
 | [`tasks-for-today/`](tasks-for-today/) | TSA1–TSA2 | Task management application with public task views and authenticated create, edit, and archive workflows | [`tsa2-tasks-for-today` at `390d4a0`](https://github.com/Sey-a-yeS/IT0049-TFA1-POS-System/tree/390d4a0172de3ad14fb7b87b8b20a5a6145521e0) |
 | [`previous-midterm-pos/`](previous-midterm-pos/) | Previous Midterm Project | Complete POS implementation with products, customers, staff, authentication, transactional sales, inventory control, and sales history | [`midterm-pos-acceptance` at `931e2ce`](https://github.com/Sey-a-yeS/IT0049-TFA1-POS-System/tree/931e2cee9126dc974881b454fe74efb277a7cd20) |
-| [`laravel-pos-tfa5/`](laravel-pos-tfa5/) | TFA5 | Four-page Laravel POS demonstration with static customer and staff arrays | This integration branch |
+| [`laravel-pos-tfa5/`](laravel-pos-tfa5/) | TFA5–TFA6 | Four-page Laravel POS demonstration, upgraded from static arrays to database-backed Eloquent accounts | TFA5 at `411b0aa` |
 
 The three original branch histories remain available. The organized directory layout is prepared separately so the assessments can eventually be reviewed directly from the default `main` branch after approval and publication.
 
@@ -25,14 +25,14 @@ IT0049-TFA1-POS-System/
 ├── pos-system/             # Technical Formative Assessments 1–4
 ├── tasks-for-today/        # Technical Summative Assessments 1–2
 ├── previous-midterm-pos/   # Previous Midterm POS application
-└── laravel-pos-tfa5/       # Technical Formative Assessment 5
+└── laravel-pos-tfa5/       # Technical Formative Assessments 5–6
 ```
 
 Every application directory has its own framework entry point, dependencies, source, and README.
 
-### TFA5 Laravel POS
+### TFA5–TFA6 Laravel POS
 
-Open [`laravel-pos-tfa5/`](laravel-pos-tfa5/) for the Laravel rebuild of the original TFA1 four-page exercise. Named routes render `/`, `/about`, `/customers`, and `/users` through `PageController`, `CustomerController`, and `UserController`. The account controllers provide five fictional static records each; Blade `@foreach` renders their tables. These pages do not require a database. Unlike the earlier CodeIgniter TFA1, this application uses Laravel's `routes/web.php`, controller actions, and Blade layout/view conventions.
+Open [`laravel-pos-tfa5/`](laravel-pos-tfa5/) for the Laravel rebuild of the original four-page POS exercise. TFA5 used controller arrays; TFA6 upgrades the same pages to MySQL-backed Customer and User Eloquent models, migrations, and a repeatable five-record seeder. Named routes remain `/`, `/about`, `/customers`, and `/users`, and Blade `@foreach` still renders the directories. The original TFA5 implementation is preserved in commit `411b0aa`.
 
 To run it locally:
 
@@ -40,11 +40,14 @@ To run it locally:
 cd laravel-pos-tfa5
 composer install
 cp .env.example .env
+# Create a dedicated counterpoint_tfa6_db database and set private DB values in .env
 php artisan key:generate
+php artisan migrate
+php artisan db:seed
 php artisan serve --host=127.0.0.1 --port=8083
 ```
 
-See [`laravel-pos-tfa5/README.md`](laravel-pos-tfa5/README.md) for full setup and deployment guidance. The TFA5 implementation report and screenshot checklist are at the repository root. Hosting is pending until an actual HTTPS deployment is tested.
+See [`laravel-pos-tfa5/README.md`](laravel-pos-tfa5/README.md) for full setup and deployment guidance. The TFA5 and TFA6 reports and screenshot checklists are at the repository root. Hosting is pending until an actual HTTPS deployment is tested.
 
 ## Technical Formative Assessments
 
@@ -110,7 +113,7 @@ Database resource:
 
 ## General local setup
 
-The exact setup for each project is documented in that project's README. The following common workflow applies to the three earlier CodeIgniter applications; TFA5 needs no database and uses Artisan as shown above.
+The exact setup for each project is documented in that project's README. The following common workflow applies to the three earlier CodeIgniter applications; the Laravel TFA6 project uses a separate database and Artisan as shown above.
 
 1. Enter exactly one application directory.
 2. Install that application's locked Composer dependencies.

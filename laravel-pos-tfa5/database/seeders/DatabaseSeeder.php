@@ -11,6 +11,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // The TFA5 directories use controller arrays; there is no database data to seed.
+        $this->call(CounterpointSampleSeeder::class);
     }
 }

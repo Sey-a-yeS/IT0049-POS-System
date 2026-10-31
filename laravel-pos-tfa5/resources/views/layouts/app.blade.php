@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="A four-page Laravel point-of-sale demonstration for IT0049 TFA5.">
+    <meta name="description" content="A four-page database-backed Laravel point-of-sale demonstration for IT0049 TFA6.">
     <title>@yield('title') | Counterpoint POS</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 </head>
@@ -22,7 +22,7 @@
             </div>
         </header>
         <main id="content" class="main-content">@yield('content')</main>
-        <footer class="site-footer"><span>Counterpoint POS</span><span>IT0049 · Technical Formative Assessment 5</span></footer>
+        <footer class="site-footer"><span>Counterpoint POS</span><span>IT0049 · Technical Formative Assessment 6</span></footer>
     </div>
 </body>
 </html>
